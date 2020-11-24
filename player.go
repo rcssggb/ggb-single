@@ -9,6 +9,10 @@ func player(c *playerclient.Client) {
 		body := c.SenseBody()
 		currentTime := c.Time()
 
+		if c.PlayMode() == "time_over" {
+			break
+		}
+
 		if sight.Ball == nil {
 			c.Turn(30)
 		} else {

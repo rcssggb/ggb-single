@@ -13,8 +13,10 @@ services:
       - ggb-network
     ports:
       - 6000:6000/udp
-    # command: bash -c "/usr/local/bin/rcssserver --server::coach_w_referee=true --server::game_log_dir='/root/logs' --server::text_log_dir='/root/logs'; sleep infinity"
-    command: bash -c "/usr/local/bin/rcssserver --server::coach_w_referee=true --server::game_log_dir='/root/logs' --server::text_log_dir='/root/logs' --server::synch_mode=1; sleep infinity"
+    command: bash -c "/usr/local/bin/rcssserver --server::coach_w_referee=true --server::game_log_dir='/root/logs' --server::text_log_dir='/root/logs' --server::synch_mode=1 --server::auto_mode=true"
+    restart: always
+    volumes:
+      - ./logs:/root/logs
     logging:
       options:
         max-size: 50m
