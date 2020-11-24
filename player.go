@@ -9,10 +9,6 @@ func player(c *playerclient.Client) {
 		body := c.SenseBody()
 		currentTime := c.Time()
 
-		if c.PlayMode() == "time_over" {
-			break
-		}
-
 		if sight.Ball == nil {
 			c.Turn(30)
 		} else {
@@ -24,6 +20,11 @@ func player(c *playerclient.Client) {
 				c.Dash(50, ballAngle)
 				c.TurnNeck(sight.Ball.Direction)
 			}
+		}
+
+		if c.PlayMode() == "time_over" {
+			c.Bye()
+			break
 		}
 
 		err := c.Error()

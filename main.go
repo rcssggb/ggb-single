@@ -16,11 +16,14 @@ func main() {
 		p, err := playerclient.NewPlayerClient("single-agent", hostName)
 		if err != nil {
 			log.Println(err)
+			p.Bye()
 			continue
 		}
 
 		time.Sleep(2 * time.Second)
 
 		player(p)
+
+		time.Sleep(2 * time.Second)
 	}
 }
