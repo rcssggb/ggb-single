@@ -1,0 +1,53 @@
+version: "3"
+
+networks:
+  ggb-network:
+    external: true
+
+services:
+  rcssserver:
+    tty: true
+    container_name: rcssserver
+    image: rcssggb/rcssserver:latest
+    networks:
+      - ggb-network
+    ports:
+      - 6000:6000/udp
+    # command: bash -c "/usr/local/bin/rcssserver --server::coach_w_referee=true --server::game_log_dir='/root/logs' --server::text_log_dir='/root/logs'; sleep infinity"
+    command: bash -c "/usr/local/bin/rcssserver --server::coach_w_referee=true --server::game_log_dir='/root/logs' --server::text_log_dir='/root/logs' --server::synch_mode=1; sleep infinity"
+    logging:
+      options:
+        max-size: 50m
+
+  rcssmonitor:
+    tty: true
+    container_name: rcssmonitor
+    image: rcssggb/rcssmonitor:latest
+    networks:
+      - ggb-network
+    environment:
+      - DISPLAY=${DISPLAY}
+      - QT_X11_NO_MITSHM=1
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    logging:
+      options:
+        max-size: 50m
+    depends_on:
+      - rcssserver
+
+  single-agent:
+    tty: true
+    container_name: single-agent
+    image: golang:latest
+    working_dir: /go/src/github.com/rcssggb/ggb-single
+    command: "go run ."
+    volumes:
+      - ./:/go/src/github.com/rcssggb/ggb-single
+    networks:
+      - ggb-network
+    logging:
+      options:
+        max-size: 50m
+    depends_on:
+      - rcssserver
