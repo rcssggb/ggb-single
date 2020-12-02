@@ -28,16 +28,20 @@ func main() {
 			body := p.SenseBody()
 			currentTime := p.Time()
 
-			if sight.Ball == nil {
-				p.Turn(30)
+			if currentTime == 0 {
+				p.Move(-30, 0)
 			} else {
-				ballAngle := sight.Ball.Direction + body.HeadAngle
-				ballDist := sight.Ball.Distance
-				if ballDist < 0.7 {
-					p.Kick(20, 0)
+				if sight.Ball == nil {
+					p.Turn(30)
 				} else {
-					p.Dash(50, ballAngle)
-					p.TurnNeck(sight.Ball.Direction)
+					ballAngle := sight.Ball.Direction + body.HeadAngle
+					ballDist := sight.Ball.Distance
+					if ballDist < 0.7 {
+						p.Kick(20, 0)
+					} else {
+						p.Dash(50, ballAngle)
+						p.TurnNeck(sight.Ball.Direction / 2)
+					}
 				}
 			}
 
