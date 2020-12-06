@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/rcssggb/ggb-lib/playerclient"
+	"github.com/rcssggb/ggb-lib/trainerclient"
 )
 
 func main() {
@@ -19,6 +20,15 @@ func main() {
 			p.Bye()
 			continue
 		}
+
+		t, err := trainerclient.NewTrainerClient(hostName)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+
+		t.EarOn()
+		t.EyeOn()
 
 		time.Sleep(2 * time.Second)
 
@@ -44,6 +54,8 @@ func main() {
 					}
 				}
 			}
+			pAbsPos := t.GlobalPositions().Teams["single-agent"][1]
+			t.Log(fmt.Sprintf("%f, %f, %f", pAbsPos.X, pAbsPos.Y, pAbsPos.BodyAngle))
 
 			if p.PlayMode() == "time_over" {
 				p.Bye()
@@ -56,11 +68,16 @@ func main() {
 				err = p.Error()
 			}
 
+			time.Sleep(500 * time.Millisecond)
+
 			if serverParams.SynchMode {
 				p.DoneSynch()
+				t.DoneSynch()
 				p.WaitSynch()
+				t.WaitSynch()
 			} else {
 				p.WaitNextStep(currentTime)
+				t.WaitNextStep(currentTime)
 			}
 		}
 

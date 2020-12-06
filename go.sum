@@ -4,3 +4,5 @@ github.com/rcssggb/ggb-lib v0.2.1 h1:KwGD1D5pNU7Ar/4BJEfkrSt7ffBN5RRWBR6Z1fJkbas
 github.com/rcssggb/ggb-lib v0.2.1/go.mod h1:MXarJEd8DLjI/9dlBMN/hHIkL2CDq/BeDEmPwxYpQZw=
 github.com/rcssggb/ggb-lib v0.2.2 h1:tCjvjAVEVb0l9tsQwuECdI8wCXQyK6pbbQILvE7zgDg=
 github.com/rcssggb/ggb-lib v0.2.2/go.mod h1:MXarJEd8DLjI/9dlBMN/hHIkL2CDq/BeDEmPwxYpQZw=
+github.com/rcssggb/ggb-lib v0.2.3 h1:NzWAMxgI/apQaehNTpGwuHgbgspK7Y84ym4rWdB5yc4=
+github.com/rcssggb/ggb-lib v0.2.3/go.mod h1:MXarJEd8DLjI/9dlBMN/hHIkL2CDq/BeDEmPwxYpQZw=
