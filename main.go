@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -68,7 +69,9 @@ func main() {
 				err = p.Error()
 			}
 
-			time.Sleep(500 * time.Millisecond)
+			if currentTime != 0 {
+				time.Sleep(500 * time.Millisecond)
+			}
 
 			if serverParams.SynchMode {
 				p.DoneSynch()
