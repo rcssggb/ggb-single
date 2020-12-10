@@ -3,9 +3,11 @@ package main
 import (
 	"fmt"
 	"log"
+	"math"
 	"time"
 
 	"github.com/rcssggb/ggb-lib/playerclient"
+	"github.com/rcssggb/ggb-lib/playerclient/parser"
 	"github.com/rcssggb/ggb-lib/rcsscommon"
 	"github.com/rcssggb/ggb-lib/trainerclient"
 )
@@ -35,34 +37,37 @@ func main() {
 		time.Sleep(2 * time.Second)
 
 		serverParams := p.ServerParams()
+		var xErr, yErr, tErr float64
+		var nErr float64
 		for {
 			sight := p.See()
-			// body := p.SenseBody()
+			body := p.SenseBody()
 			currentTime := p.Time()
 
 			if currentTime == 0 {
 				p.Move(-30, 0)
 			} else {
-				// if sight.Ball == nil {
-				// 	p.Turn(30)
-				// } else {
-				// 	ballAngle := sight.Ball.Direction + body.HeadAngle
-				// 	ballDist := sight.Ball.Distance
-				// 	if ballDist < 0.7 {
-				// 		p.Kick(20, 0)
-				// 	} else {
-				// 		p.Dash(50, ballAngle)
-				// 		p.TurnNeck(sight.Ball.Direction / 2)
-				// 	}
-				// }
-				p.Turn(10)
+				if sight.Ball == nil {
+					p.Turn(30)
+				} else {
+					ballAngle := sight.Ball.Direction + body.HeadAngle
+					ballDist := sight.Ball.Distance
+					if ballDist < 0.7 {
+						p.Kick(20, 0)
+					} else {
+						p.Dash(50, ballAngle)
+						p.TurnNeck(sight.Ball.Direction / 2)
+					}
+				}
 			}
 			pAbsPos := t.GlobalPositions().Teams["single-agent"][1]
-			t.Log(fmt.Sprintf("tAbsolute %f", pAbsPos.BodyAngle))
+			// t.Log(fmt.Sprintf("abs %.2f %.2f %.2f", pAbsPos.X, pAbsPos.Y, pAbsPos.BodyAngle))
 
-			var tEstimate float64
+			var tEstimate, xEstimate, yEstimate float64
+			var closestLine *parser.LineData
+			closestLine = nil
 			if sight.Lines.Len() > 0 {
-				closestLine := sight.Lines[0]
+				closestLine = &sight.Lines[0]
 				lDir := closestLine.Direction
 				if lDir < 0 {
 					lDir += 90
@@ -81,13 +86,41 @@ func main() {
 				}
 			}
 
+			// If you see 2 lines it means you're outside the field
+			if sight.Lines.Len() >= 2 {
+				tEstimate += 180
+			}
+
+			tEstimate -= body.HeadAngle
+
 			if tEstimate > 180 {
 				tEstimate -= 360
 			} else if tEstimate < -180 {
 				tEstimate += 360
 			}
 
-			p.Log(fmt.Sprintf("tEstimate %f", tEstimate))
+			if sight.Flags.Len() > 0 {
+				var xAcc, yAcc float64 = 0, 0
+				for _, f := range sight.Flags {
+					xFlag, yFlag := f.ID.Position()
+					absAngle := (3.14159 / 180.0) * (f.Direction + tEstimate + body.HeadAngle)
+					xTmp := xFlag - math.Cos(absAngle)*f.Distance
+					yTmp := yFlag - math.Sin(absAngle)*f.Distance
+					// p.Log(fmt.Sprintf(
+					// 	"ID:%d Dist:%.2f, Dir: %.2f, xEst: %.2f, yEst: %.2f",
+					// 	f.ID, f.Distance, absAngle, xTmp, yTmp))
+					xAcc += xTmp
+					yAcc += yTmp
+				}
+				xEstimate = xAcc / (float64)(sight.Flags.Len())
+				yEstimate = yAcc / (float64)(sight.Flags.Len())
+			}
+
+			// t.Log(fmt.Sprintf("est %.2f %.2f %.2f", xEstimate, yEstimate, tEstimate))
+			nErr++
+			xErr = ((nErr-1)/nErr)*xErr + (1/nErr)*math.Abs(xEstimate-pAbsPos.X)
+			yErr = ((nErr-1)/nErr)*yErr + (1/nErr)*math.Abs(yEstimate-pAbsPos.Y)
+			tErr = ((nErr-1)/nErr)*tErr + (1/nErr)*math.Abs(tEstimate-pAbsPos.BodyAngle)
 
 			if p.PlayMode() == "time_over" {
 				p.Bye()
@@ -101,7 +134,7 @@ func main() {
 			}
 
 			if currentTime != 0 {
-				time.Sleep(200 * time.Millisecond)
+				// time.Sleep(10 * time.Millisecond)
 			}
 
 			if serverParams.SynchMode {
@@ -114,6 +147,10 @@ func main() {
 				t.WaitNextStep(currentTime)
 			}
 		}
+
+		t.Log(fmt.Sprintf("Average X Error: %.3f", xErr))
+		t.Log(fmt.Sprintf("Average Y Error: %.3f", yErr))
+		t.Log(fmt.Sprintf("Average T Error: %.3f", tErr))
 
 		time.Sleep(2 * time.Second)
 	}
