@@ -6,10 +6,10 @@ import (
 	"math"
 	"time"
 
-	"github.com/rcssggb/ggb-lib/playerclient"
 	"github.com/rcssggb/ggb-lib/playerclient/parser"
 	"github.com/rcssggb/ggb-lib/rcsscommon"
 	"github.com/rcssggb/ggb-lib/trainerclient"
+	"github.com/rcssggb/ggb-single/player"
 )
 
 func main() {
@@ -18,10 +18,9 @@ func main() {
 	hostName := "rcssserver"
 
 	for {
-		p, err := playerclient.NewPlayerClient("single-agent", hostName)
+		p, err := player.NewPlayer("single-agent", hostName)
 		if err != nil {
 			log.Println(err)
-			p.Bye()
 			continue
 		}
 
@@ -36,27 +35,27 @@ func main() {
 
 		time.Sleep(2 * time.Second)
 
-		serverParams := p.ServerParams()
+		serverParams := p.Client.ServerParams()
 		var xErr, yErr, tErr float64
 		var nErr float64
 		for {
-			sight := p.See()
-			body := p.SenseBody()
-			currentTime := p.Time()
+			sight := p.Client.See()
+			body := p.Client.SenseBody()
+			currentTime := p.Client.Time()
 
 			if currentTime == 0 {
-				p.Move(-30, 0)
+				p.Client.Move(-30, 0)
 			} else {
 				if sight.Ball == nil {
-					p.Turn(30)
+					p.Client.Turn(30)
 				} else {
 					ballAngle := sight.Ball.Direction + body.HeadAngle
 					ballDist := sight.Ball.Distance
 					if ballDist < 0.7 {
-						p.Kick(20, 0)
+						p.Client.Kick(20, 0)
 					} else {
-						p.Dash(50, ballAngle)
-						p.TurnNeck(sight.Ball.Direction / 2)
+						p.Client.Dash(50, ballAngle)
+						p.Client.TurnNeck(sight.Ball.Direction / 2)
 					}
 				}
 			}
@@ -106,7 +105,7 @@ func main() {
 					absAngle := (3.14159 / 180.0) * (f.Direction + tEstimate + body.HeadAngle)
 					xTmp := xFlag - math.Cos(absAngle)*f.Distance
 					yTmp := yFlag - math.Sin(absAngle)*f.Distance
-					// p.Log(fmt.Sprintf(
+					// p.Client.Log(fmt.Sprintf(
 					// 	"ID:%d Dist:%.2f, Dir: %.2f, xEst: %.2f, yEst: %.2f",
 					// 	f.ID, f.Distance, absAngle, xTmp, yTmp))
 					xAcc += xTmp
@@ -122,15 +121,15 @@ func main() {
 			yErr = ((nErr-1)/nErr)*yErr + (1/nErr)*math.Abs(yEstimate-pAbsPos.Y)
 			tErr = ((nErr-1)/nErr)*tErr + (1/nErr)*math.Abs(tEstimate-pAbsPos.BodyAngle)
 
-			if p.PlayMode() == "time_over" {
-				p.Bye()
+			if p.Client.PlayMode() == "time_over" {
+				p.Client.Bye()
 				break
 			}
 
-			err := p.Error()
+			err := p.Client.Error()
 			for err != nil {
-				p.Log(err)
-				err = p.Error()
+				p.Client.Log(err)
+				err = p.Client.Error()
 			}
 
 			if currentTime != 0 {
@@ -138,12 +137,12 @@ func main() {
 			}
 
 			if serverParams.SynchMode {
-				p.DoneSynch()
+				p.Client.DoneSynch()
 				t.DoneSynch()
-				p.WaitSynch()
+				p.Client.WaitSynch()
 				t.WaitSynch()
 			} else {
-				p.WaitNextStep(currentTime)
+				p.Client.WaitNextStep(currentTime)
 				t.WaitNextStep(currentTime)
 			}
 		}
