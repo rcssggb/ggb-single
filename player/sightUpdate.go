@@ -1,0 +1,77 @@
+package player
+
+import (
+	"math"
+	"time"
+
+	"github.com/rcssggb/ggb-lib/playerclient/parser"
+	"github.com/rcssggb/ggb-lib/rcsscommon"
+)
+
+// sightUpdate defines the goroutine that receives and
+// processes visual information received by client
+func (p *Player) sightUpdate() {
+	currentTimestamp := -1
+	for {
+		data := p.Client.See()
+
+		// This if statement and whole timing logic must be changed after ggb-lib implements new data signaling
+		if data.Time <= currentTimestamp {
+			time.Sleep(100 * time.Microsecond)
+			if data.Time != currentTimestamp {
+				continue
+			}
+		}
+
+		currentTimestamp = data.Time
+
+		var closestLine *parser.LineData
+		closestLine = nil
+		if data.Lines.Len() > 0 {
+			closestLine = &data.Lines[0]
+			lDir := closestLine.Direction
+			if lDir < 0 {
+				lDir += 90
+			} else {
+				lDir -= 90
+			}
+			switch closestLine.ID {
+			case rcsscommon.LineRight:
+				p.selfPos.T = 0 - lDir
+			case rcsscommon.LineBottom:
+				p.selfPos.T = 90 - lDir
+			case rcsscommon.LineLeft:
+				p.selfPos.T = 180 - lDir
+			case rcsscommon.LineTop:
+				p.selfPos.T = -90 - lDir
+			}
+		}
+
+		// If you see 2 lines it means you're outside the field
+		if data.Lines.Len() >= 2 {
+			p.selfPos.T += 180
+		}
+
+		p.selfPos.T -= p.body.NeckAngle
+
+		if p.selfPos.T > 180 {
+			p.selfPos.T -= 360
+		} else if p.selfPos.T < -180 {
+			p.selfPos.T += 360
+		}
+
+		if data.Flags.Len() > 0 {
+			var xAcc, yAcc float64 = 0, 0
+			for _, f := range data.Flags {
+				xFlag, yFlag := f.ID.Position()
+				absAngle := (3.14159 / 180.0) * (f.Direction + p.selfPos.T + p.body.NeckAngle)
+				xTmp := xFlag - math.Cos(absAngle)*f.Distance
+				yTmp := yFlag - math.Sin(absAngle)*f.Distance
+				xAcc += xTmp
+				yAcc += yTmp
+			}
+			p.selfPos.X = xAcc / (float64)(data.Flags.Len())
+			p.selfPos.Y = yAcc / (float64)(data.Flags.Len())
+		}
+	}
+}

@@ -7,7 +7,8 @@ import (
 // Player is the high-level structure containing player methods and sensors
 type Player struct {
 	Client  *playerclient.Client
-	SelfPos Position
+	selfPos Position
+	body    Body
 }
 
 // NewPlayer constructs and initializes the player struct
@@ -18,7 +19,12 @@ func NewPlayer(team, host string) (*Player, error) {
 		return nil, err
 	}
 
-	return &Player{
+	p := &Player{
 		Client: client,
-	}, nil
+	}
+
+	go p.bodyUpdate()
+	go p.sightUpdate()
+
+	return p, nil
 }
