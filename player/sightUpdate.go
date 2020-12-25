@@ -2,7 +2,6 @@ package player
 
 import (
 	"math"
-	"time"
 
 	"github.com/rcssggb/ggb-lib/playerclient/parser"
 	"github.com/rcssggb/ggb-lib/rcsscommon"
@@ -11,19 +10,10 @@ import (
 // sightUpdate defines the goroutine that receives and
 // processes visual information received by client
 func (p *Player) sightUpdate() {
-	currentTimestamp := -1
 	for {
+		p.Client.WaitSight()
+
 		data := p.Client.See()
-
-		// This if statement and whole timing logic must be changed after ggb-lib implements new data signaling
-		if data.Time <= currentTimestamp {
-			time.Sleep(100 * time.Microsecond)
-			if data.Time != currentTimestamp {
-				continue
-			}
-		}
-
-		currentTimestamp = data.Time
 
 		var closestLine *parser.LineData
 		closestLine = nil
