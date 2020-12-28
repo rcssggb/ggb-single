@@ -63,5 +63,13 @@ func (p *Player) sightUpdate() {
 			p.selfPos.X = xAcc / (float64)(data.Flags.Len())
 			p.selfPos.Y = yAcc / (float64)(data.Flags.Len())
 		}
+
+		if data.Ball != nil {
+			p.ball.DirChange = data.Ball.DirChange
+			p.ball.DistChange = data.Ball.DistChange
+			p.ball.Distance = data.Ball.Distance
+			p.ball.Direction = data.Ball.Direction
+		}
+
 	}
 }

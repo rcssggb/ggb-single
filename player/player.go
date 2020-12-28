@@ -9,6 +9,7 @@ type Player struct {
 	Client  *playerclient.Client
 	selfPos Position
 	body    Body
+	ball    Ball
 }
 
 // NewPlayer constructs and initializes the player struct
