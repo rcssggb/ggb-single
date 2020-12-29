@@ -71,5 +71,24 @@ func (p *Player) sightUpdate() {
 			p.ball.Direction = data.Ball.Direction
 		}
 
+		if len(data.Players) > 0 {
+			for _, player := range data.Players {
+				pl := PlayerPosition{
+					Team:        player.Team,
+					Unum:        player.Unum,
+					Distance:    player.Distance,
+					Direction:   player.Direction,
+					DistChange:  player.DistChange,
+					DirChange:   player.DirChange,
+					BodyDir:     player.BodyDir,
+					NeckDir:     player.NeckDir,
+					IsPointing:  player.IsPointing,
+					PointingDir: player.PointingDir,
+					Action:      player.Action,
+				}
+				p.PlayersPos = append(p.PlayersPos, pl)
+			}
+		}
+
 	}
 }
