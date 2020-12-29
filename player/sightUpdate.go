@@ -10,6 +10,7 @@ import (
 // sightUpdate defines the goroutine that receives and
 // processes visual information received by client
 func (p *Player) sightUpdate() {
+	lastTime := -1
 	for {
 		p.Client.WaitSight()
 
@@ -65,10 +66,25 @@ func (p *Player) sightUpdate() {
 		}
 
 		if data.Ball != nil {
-			p.ball.DirChange = data.Ball.DirChange
-			p.ball.DistChange = data.Ball.DistChange
+			// Relative coordinates
 			p.ball.Distance = data.Ball.Distance
-			p.ball.Direction = data.Ball.Direction
+			p.ball.Direction = data.Ball.Direction - p.body.NeckAngle
+			p.ball.DistChange = data.Ball.DistChange
+			p.ball.DirChange = data.Ball.DirChange
+
+			// Absolute coordinates
+			sin, cos := math.Sincos(math.Pi / 180.0 * (p.ball.Direction - p.selfPos.T))
+			p.ball.X = p.selfPos.X + p.ball.Distance*cos
+			p.ball.Y = p.selfPos.Y + p.ball.Distance*sin
+			p.ball.VelX = p.ball.DistChange*cos + p.ball.DirChange*p.ball.Distance*sin
+			p.ball.VelY = p.ball.DistChange*sin + p.ball.DirChange*p.ball.Distance*cos
+
+			p.ball.NotSeenFor = 0
+		} else {
+			// TODO: update ball old relative coordinates considering new selfpos?
+			if data.Time > lastTime {
+				p.ball.NotSeenFor++
+			}
 		}
 
 		if len(data.Players) > 0 {
@@ -90,5 +106,8 @@ func (p *Player) sightUpdate() {
 			}
 		}
 
+		if data.Time > lastTime {
+			lastTime = data.Time
+		}
 	}
 }
