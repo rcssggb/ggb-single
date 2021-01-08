@@ -7,8 +7,8 @@ import (
 // Player is the high-level structure containing player methods and sensors
 type Player struct {
 	Client             *playerclient.Client
-	friendlyPlayersPos map[int]PlayerPosition
-	opponentPlayersPos map[int]PlayerPosition
+	friendlyPlayersPos map[int]SeenPlayerPosition
+	opponentPlayersPos map[int]SeenPlayerPosition
 	selfPos            Position
 	body               Body
 	ball               Ball

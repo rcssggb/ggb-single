@@ -1,8 +1,8 @@
 package player
 
-// PlayerPosition contains data about seen players.
+// SeenPlayerPosition contains data about seen players.
 // Team == "" means you don't know the player's team.
-type PlayerPosition struct {
+type SeenPlayerPosition struct {
 	// Number of simulation cycles since player was last seen
 	NotSeenFor uint16
 

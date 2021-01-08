@@ -111,7 +111,7 @@ func (p *Player) sightUpdate() {
 				// For now we are ignoring not fully known players
 				break
 			}
-			var seenPlayerPos = PlayerPosition{
+			var seenPlayerPos = SeenPlayerPosition{
 				Distance:   seenPlayer.Distance,
 				Direction:  seenPlayer.Direction,
 				DistChange: seenPlayer.DistChange,
