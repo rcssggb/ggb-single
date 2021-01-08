@@ -66,43 +66,74 @@ func (p *Player) sightUpdate() {
 		}
 
 		if data.Ball != nil {
+			p.ball.NotSeenFor = 0
+
 			// Relative coordinates
 			p.ball.Distance = data.Ball.Distance
 			p.ball.Direction = data.Ball.Direction - p.body.NeckAngle
 			p.ball.DistChange = data.Ball.DistChange
 			p.ball.DirChange = data.Ball.DirChange
 
-			// Absolute coordinates
+			/* Absolute coordinates */
+			// Calculate sin and cos of vector from player to object
 			sin, cos := math.Sincos(math.Pi / 180.0 * (p.ball.Direction - p.selfPos.T))
+			// Project to absolute frame of reference
 			p.ball.X = p.selfPos.X + p.ball.Distance*cos
 			p.ball.Y = p.selfPos.Y + p.ball.Distance*sin
-			p.ball.VelX = p.ball.DistChange*cos + p.ball.DirChange*p.ball.Distance*sin
+			// Multiply DirChange by relative vector length and
+			// rotate the vectors to the absolute frame of reference
+			p.ball.VelX = p.ball.DistChange*cos - p.ball.DirChange*p.ball.Distance*sin
 			p.ball.VelY = p.ball.DistChange*sin + p.ball.DirChange*p.ball.Distance*cos
-
-			p.ball.NotSeenFor = 0
 		} else {
-			// TODO: update ball old relative coordinates considering new selfpos?
+			// If ball was not seen, increment NotSeenFor timer
 			if data.Time > lastTime {
-				p.ball.NotSeenFor++
+				p.ball.NotSeenFor += (uint16)(data.Time - lastTime)
 			}
 		}
 
-		if len(data.Players) > 0 {
-			for _, player := range data.Players {
-				pl := PlayerPosition{
-					Team:        player.Team,
-					Unum:        player.Unum,
-					Distance:    player.Distance,
-					Direction:   player.Direction,
-					DistChange:  player.DistChange,
-					DirChange:   player.DirChange,
-					BodyDir:     player.BodyDir,
-					NeckDir:     player.NeckDir,
-					IsPointing:  player.IsPointing,
-					PointingDir: player.PointingDir,
-					Action:      player.Action,
-				}
-				p.PlayersPos = append(p.PlayersPos, pl)
+		// Before updating players according to what was seen,
+		// increment NotSeenFor timer for every player
+		// (seen players will have timer reset later)
+		if data.Time > lastTime {
+			for u := range p.friendlyPlayersPos {
+				pPos := p.friendlyPlayersPos[u]
+				pPos.NotSeenFor += (uint16)(data.Time - lastTime)
+			}
+			for u := range p.opponentPlayersPos {
+				pPos := p.opponentPlayersPos[u]
+				pPos.NotSeenFor += (uint16)(data.Time - lastTime)
+			}
+		}
+
+		// Update seen players positions
+		for _, seenPlayer := range data.Players {
+			if seenPlayer.Unum == -1 {
+				// For now we are ignoring not fully known players
+				break
+			}
+			var seenPlayerPos = PlayerPosition{
+				Distance:   seenPlayer.Distance,
+				Direction:  seenPlayer.Direction,
+				DistChange: seenPlayer.DistChange,
+				DirChange:  seenPlayer.DirChange,
+				BodyDir:    seenPlayer.BodyDir + p.selfPos.T + p.body.NeckAngle,
+				NeckDir:    seenPlayer.NeckDir + p.selfPos.T + p.body.NeckAngle,
+			}
+
+			// Calculate sin and cos of vector from player to object
+			sin, cos := math.Sincos(math.Pi / 180.0 * (seenPlayer.Direction - p.selfPos.T))
+			// Project to absolute frame of reference
+			seenPlayerPos.X = p.selfPos.X + seenPlayer.Distance*cos
+			seenPlayerPos.Y = p.selfPos.Y + seenPlayer.Distance*sin
+			// Multiply DirChange by relative vector length and
+			// rotate the vectors to the absolute frame of reference
+			seenPlayerPos.VelX = seenPlayer.DistChange*cos - seenPlayer.DirChange*seenPlayer.Distance*sin
+			seenPlayerPos.VelY = seenPlayer.DistChange*sin + seenPlayer.DirChange*seenPlayer.Distance*cos
+
+			if seenPlayer.Team == p.Client.TeamName() {
+				p.friendlyPlayersPos[seenPlayer.Unum] = seenPlayerPos
+			} else {
+				p.opponentPlayersPos[seenPlayer.Unum] = seenPlayerPos
 			}
 		}
 
