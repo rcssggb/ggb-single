@@ -15,11 +15,15 @@ func main() {
 	estTJSON, _ := ioutil.ReadFile("estTJSON.json")
 	absTJSON, _ := ioutil.ReadFile("absTJSON.json")
 
-	var estPoints [][]float64
-	var absPoints [][]float64
-	var estTPoints []float64
-	var absTPoints []float64
+	ballEstJSON, _ := ioutil.ReadFile("ballEstJSON.json")
+	ballAbsJSON, _ := ioutil.ReadFile("ballAbsJSON.json")
 
+	var estPoints, absPoints [][]float64
+	var estTPoints, absTPoints []float64
+
+	var ballEstPoints, ballAbsPoints [][]float64
+
+	// Unmarshal self pos
 	err := json.Unmarshal(estJSON, &estPoints)
 	if err != nil {
 		fmt.Println(err)
@@ -41,6 +45,18 @@ func main() {
 		return
 	}
 
+	// Unmarshal ball pos
+	err = json.Unmarshal(ballEstJSON, &ballEstPoints)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	err = json.Unmarshal(ballAbsJSON, &ballAbsPoints)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
 	plotPos, _ := glot.NewPlot(2, false, false)
 
 	plotPos.AddPointGroup("estimated", "lines", estPoints)
@@ -54,4 +70,11 @@ func main() {
 	plotAng.AddPointGroup("absolute", "lines", absTPoints)
 
 	plotAng.SavePlot("plotAng.png")
+
+	plotBallPos, _ := glot.NewPlot(2, false, false)
+
+	plotBallPos.AddPointGroup("estimated", "lines", ballEstPoints)
+	plotBallPos.AddPointGroup("absolute", "lines", ballAbsPoints)
+
+	plotBallPos.SavePlot("plotBallPos.png")
 }

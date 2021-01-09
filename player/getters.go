@@ -9,3 +9,8 @@ func (p Player) GetSelfPos() Position {
 func (p Player) GetBody() Body {
 	return p.body
 }
+
+// GetBall returns the current ball info
+func (p Player) GetBall() Ball {
+	return p.ball
+}
