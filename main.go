@@ -93,11 +93,16 @@ func main() {
 			Tpos = append(Tpos, pAbsPos.BodyAngle)
 
 			// Ball position
-			estBallX = append(estBallX, bEstPos.X)
-			estBallY = append(estBallY, bEstPos.Y)
+			if bEstPos.NotSeenFor == 0 {
+				estBallX = append(estBallX, bEstPos.X)
+				estBallY = append(estBallY, bEstPos.Y)
 
-			ballXpos = append(ballXpos, bAbsPos.X)
-			ballYpos = append(ballYpos, bAbsPos.Y)
+				ballXpos = append(ballXpos, bAbsPos.X)
+				ballYpos = append(ballYpos, bAbsPos.Y)
+			} else {
+				ballXpos = append(ballXpos, bAbsPos.X)
+				ballYpos = append(ballYpos, bAbsPos.Y)
+			}
 
 			if p.Client.PlayMode() == "time_over" {
 				p.Client.Bye()

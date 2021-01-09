@@ -59,12 +59,15 @@ func main() {
 
 	plotPos, _ := glot.NewPlot(2, false, false)
 
+	plotPos.SetTitle("Self Pos")
+
 	plotPos.AddPointGroup("estimated", "lines", estPoints)
 	plotPos.AddPointGroup("absolute", "lines", absPoints)
 
 	plotPos.SavePlot("plotPos.png")
 
 	plotAng, _ := glot.NewPlot(1, false, false)
+	plotAng.SetTitle("Self Angle")
 
 	plotAng.AddPointGroup("estimated", "lines", estTPoints)
 	plotAng.AddPointGroup("absolute", "lines", absTPoints)
@@ -72,6 +75,7 @@ func main() {
 	plotAng.SavePlot("plotAng.png")
 
 	plotBallPos, _ := glot.NewPlot(2, false, false)
+	plotBallPos.SetTitle("Ball Pos")
 
 	plotBallPos.AddPointGroup("estimated", "lines", ballEstPoints)
 	plotBallPos.AddPointGroup("absolute", "lines", ballAbsPoints)
