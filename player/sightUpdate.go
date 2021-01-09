@@ -13,6 +13,7 @@ func (p *Player) sightUpdate() {
 	lastTime := -1
 	for {
 		p.Client.WaitSight()
+		p.mutex.Lock()
 
 		data := p.Client.See()
 
@@ -140,5 +141,7 @@ func (p *Player) sightUpdate() {
 		if data.Time > lastTime {
 			lastTime = data.Time
 		}
+
+		p.mutex.Unlock()
 	}
 }
