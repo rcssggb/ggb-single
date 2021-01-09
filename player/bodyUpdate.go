@@ -8,6 +8,8 @@ func (p *Player) bodyUpdate() {
 
 		data := p.Client.SenseBody()
 
-		p.body.NeckAngle = data.HeadAngle
+		p.self.NeckAngle = data.HeadAngle
+		p.self.VelDir = data.Speed.Direction
+		p.self.VelSpeed = data.Speed.Magnitude
 	}
 }

@@ -1,13 +1,8 @@
 package player
 
-// GetSelfPos returns the current player position
-func (p Player) GetSelfPos() Position {
-	return p.selfPos
-}
-
-// GetBody returns the current player body info
-func (p Player) GetBody() Body {
-	return p.body
+// GetSelfData returns the current player position
+func (p Player) GetSelfData() SelfData {
+	return p.self
 }
 
 // GetBall returns the current ball info

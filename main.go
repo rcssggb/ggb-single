@@ -73,7 +73,7 @@ func main() {
 			bAbsPos := t.GlobalPositions().Ball
 			// t.Log(fmt.Sprintf("abs %.2f %.2f %.2f", pAbsPos.X, pAbsPos.Y, pAbsPos.BodyAngle))
 
-			pEstPos := p.GetSelfPos()
+			pEstPos := p.GetSelfData()
 			bEstPos := p.GetBall()
 
 			// t.Log(fmt.Sprintf("est %.2f %.2f %.2f", xEstimate, yEstimate, tEstimate))

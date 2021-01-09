@@ -9,8 +9,7 @@ type Player struct {
 	Client             *playerclient.Client
 	friendlyPlayersPos map[int]SeenPlayerPosition
 	opponentPlayersPos map[int]SeenPlayerPosition
-	selfPos            Position
-	body               Body
+	self               SelfData
 	ball               Ball
 }
 

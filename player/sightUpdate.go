@@ -28,41 +28,41 @@ func (p *Player) sightUpdate() {
 			}
 			switch closestLine.ID {
 			case rcsscommon.LineRight:
-				p.selfPos.T = 0 - lDir
+				p.self.T = 0 - lDir
 			case rcsscommon.LineBottom:
-				p.selfPos.T = 90 - lDir
+				p.self.T = 90 - lDir
 			case rcsscommon.LineLeft:
-				p.selfPos.T = 180 - lDir
+				p.self.T = 180 - lDir
 			case rcsscommon.LineTop:
-				p.selfPos.T = -90 - lDir
+				p.self.T = -90 - lDir
 			}
 		}
 
 		// If you see 2 lines it means you're outside the field
 		if data.Lines.Len() >= 2 {
-			p.selfPos.T += 180
+			p.self.T += 180
 		}
 
-		p.selfPos.T -= p.body.NeckAngle
+		p.self.T -= p.self.NeckAngle
 
-		if p.selfPos.T > 180 {
-			p.selfPos.T -= 360
-		} else if p.selfPos.T < -180 {
-			p.selfPos.T += 360
+		if p.self.T > 180 {
+			p.self.T -= 360
+		} else if p.self.T < -180 {
+			p.self.T += 360
 		}
 
 		if data.Flags.Len() > 0 {
 			var xAcc, yAcc float64 = 0, 0
 			for _, f := range data.Flags {
 				xFlag, yFlag := f.ID.Position()
-				absAngle := (3.14159 / 180.0) * (f.Direction + p.selfPos.T + p.body.NeckAngle)
+				absAngle := (3.14159 / 180.0) * (f.Direction + p.self.T + p.self.NeckAngle)
 				xTmp := xFlag - math.Cos(absAngle)*f.Distance
 				yTmp := yFlag - math.Sin(absAngle)*f.Distance
 				xAcc += xTmp
 				yAcc += yTmp
 			}
-			p.selfPos.X = xAcc / (float64)(data.Flags.Len())
-			p.selfPos.Y = yAcc / (float64)(data.Flags.Len())
+			p.self.X = xAcc / (float64)(data.Flags.Len())
+			p.self.Y = yAcc / (float64)(data.Flags.Len())
 		}
 
 		if data.Ball != nil {
@@ -70,16 +70,16 @@ func (p *Player) sightUpdate() {
 
 			// Relative coordinates
 			p.ball.Distance = data.Ball.Distance
-			p.ball.Direction = data.Ball.Direction - p.body.NeckAngle
+			p.ball.Direction = data.Ball.Direction - p.self.NeckAngle
 			p.ball.DistChange = data.Ball.DistChange
 			p.ball.DirChange = data.Ball.DirChange
 
 			/* Absolute coordinates */
 			// Calculate sin and cos of vector from player to object
-			sin, cos := math.Sincos(math.Pi / 180.0 * (p.ball.Direction - p.selfPos.T))
+			sin, cos := math.Sincos(math.Pi / 180.0 * (p.self.T - p.ball.Direction))
 			// Project to absolute frame of reference
-			p.ball.X = p.selfPos.X + p.ball.Distance*cos
-			p.ball.Y = p.selfPos.Y + p.ball.Distance*sin
+			p.ball.X = p.self.X + p.ball.Distance*cos
+			p.ball.Y = p.self.Y + p.ball.Distance*sin
 			// Multiply DirChange by relative vector length and
 			// rotate the vectors to the absolute frame of reference
 			p.ball.VelX = p.ball.DistChange*cos - p.ball.DirChange*p.ball.Distance*sin
@@ -116,15 +116,15 @@ func (p *Player) sightUpdate() {
 				Direction:  seenPlayer.Direction,
 				DistChange: seenPlayer.DistChange,
 				DirChange:  seenPlayer.DirChange,
-				BodyDir:    seenPlayer.BodyDir + p.selfPos.T + p.body.NeckAngle,
-				NeckDir:    seenPlayer.NeckDir + p.selfPos.T + p.body.NeckAngle,
+				BodyDir:    seenPlayer.BodyDir + p.self.T + p.self.NeckAngle,
+				NeckDir:    seenPlayer.NeckDir + p.self.T + p.self.NeckAngle,
 			}
 
 			// Calculate sin and cos of vector from player to object
-			sin, cos := math.Sincos(math.Pi / 180.0 * (seenPlayer.Direction - p.selfPos.T))
+			sin, cos := math.Sincos(math.Pi / 180.0 * (p.self.T - seenPlayer.Direction))
 			// Project to absolute frame of reference
-			seenPlayerPos.X = p.selfPos.X + seenPlayer.Distance*cos
-			seenPlayerPos.Y = p.selfPos.Y + seenPlayer.Distance*sin
+			seenPlayerPos.X = p.self.X + seenPlayer.Distance*cos
+			seenPlayerPos.Y = p.self.Y + seenPlayer.Distance*sin
 			// Multiply DirChange by relative vector length and
 			// rotate the vectors to the absolute frame of reference
 			seenPlayerPos.VelX = seenPlayer.DistChange*cos - seenPlayer.DirChange*seenPlayer.Distance*sin
