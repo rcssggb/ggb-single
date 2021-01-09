@@ -1,3 +1,7 @@
 /vendor
 logs/*
 !logs/.gitkeep
+
+*.json
+
+*.png

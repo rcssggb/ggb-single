@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"math"
 	"time"
@@ -36,6 +38,12 @@ func main() {
 		serverParams := p.Client.ServerParams()
 		var xErr, yErr, tErr float64
 		var nErr float64
+		estXpos := []float64{}
+		estYpos := []float64{}
+		estTpos := []float64{}
+		Xpos := []float64{}
+		Ypos := []float64{}
+		Tpos := []float64{}
 		for {
 			sight := p.Client.See()
 			body := p.Client.SenseBody()
@@ -68,6 +76,13 @@ func main() {
 			yErr = ((nErr-1)/nErr)*yErr + (1/nErr)*math.Abs(pEstPos.Y-pAbsPos.Y)
 			tErr = ((nErr-1)/nErr)*tErr + (1/nErr)*math.Abs(pEstPos.T-pAbsPos.BodyAngle)
 
+			estXpos = append(estXpos, pEstPos.X)
+			estYpos = append(estYpos, pEstPos.Y)
+			estTpos = append(estTpos, pEstPos.T)
+			Xpos = append(Xpos, pAbsPos.X)
+			Ypos = append(Ypos, pAbsPos.Y)
+			Tpos = append(Tpos, pAbsPos.BodyAngle)
+
 			if p.Client.PlayMode() == "time_over" {
 				p.Client.Bye()
 				break
@@ -97,6 +112,21 @@ func main() {
 		t.Log(fmt.Sprintf("Average X Error: %.3f", xErr))
 		t.Log(fmt.Sprintf("Average Y Error: %.3f", yErr))
 		t.Log(fmt.Sprintf("Average T Error: %.3f", tErr))
+
+		estPoints := [][]float64{estXpos, estYpos}
+		absPoints := [][]float64{Xpos, Ypos}
+
+		fmt.Println("Saving estimations...")
+
+		estJSON, _ := json.Marshal(estPoints)
+		absJSON, _ := json.Marshal(absPoints)
+		estTJSON, _ := json.Marshal(estTpos)
+		absTJSON, _ := json.Marshal(Tpos)
+
+		ioutil.WriteFile("data/estJSON.json", estJSON, 0644)
+		ioutil.WriteFile("data/absJSON.json", absJSON, 0644)
+		ioutil.WriteFile("data/estTJSON.json", estTJSON, 0644)
+		ioutil.WriteFile("data/absTJSON.json", absTJSON, 0644)
 
 		time.Sleep(2 * time.Second)
 	}
