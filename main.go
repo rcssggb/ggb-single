@@ -46,6 +46,8 @@ func main() {
 		var estBallX, estBallY []float64
 		var ballXpos, ballYpos []float64
 
+		t.Start()
+
 		for {
 			sight := p.Client.See()
 			body := p.Client.SenseBody()
