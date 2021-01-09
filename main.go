@@ -37,7 +37,9 @@ func main() {
 
 		serverParams := p.Client.ServerParams()
 		var xErr, yErr, tErr float64
+		var xVErr, yVErr float64
 		var bXErr, bYErr float64
+		var bVXErr, bVYErr float64
 		var nErr float64
 
 		var estXpos, estYpos, estTpos []float64
@@ -82,8 +84,13 @@ func main() {
 			yErr = ((nErr-1)/nErr)*yErr + (1/nErr)*math.Abs(pEstPos.Y-pAbsPos.Y)
 			tErr = ((nErr-1)/nErr)*tErr + (1/nErr)*math.Abs(pEstPos.T-pAbsPos.BodyAngle)
 
+			xVErr = ((nErr-1)/nErr)*xVErr + (1/nErr)*math.Abs(pEstPos.VelX-pAbsPos.DeltaX)
+			yVErr = ((nErr-1)/nErr)*yVErr + (1/nErr)*math.Abs(pEstPos.VelY-pAbsPos.DeltaY)
+
 			bXErr = ((nErr-1)/nErr)*bXErr + (1/nErr)*math.Abs(bEstPos.X-bAbsPos.X)
 			bYErr = ((nErr-1)/nErr)*bYErr + (1/nErr)*math.Abs(bEstPos.Y-bAbsPos.Y)
+			bVXErr = ((nErr-1)/nErr)*bVXErr + (1/nErr)*math.Abs(bEstPos.VelX-bAbsPos.DeltaX)
+			bVYErr = ((nErr-1)/nErr)*bVYErr + (1/nErr)*math.Abs(bEstPos.VelY-bAbsPos.DeltaY)
 
 			// Self position
 			estXpos = append(estXpos, pEstPos.X)
@@ -136,8 +143,14 @@ func main() {
 		t.Log(fmt.Sprintf("Average Y Error: %.3f", yErr))
 		t.Log(fmt.Sprintf("Average T Error: %.3f", tErr))
 
+		t.Log(fmt.Sprintf("Average VelX Error: %.3f", xVErr))
+		t.Log(fmt.Sprintf("Average VelY Error: %.3f", yVErr))
+
 		t.Log(fmt.Sprintf("Average Ball X Error: %.3f", bXErr))
 		t.Log(fmt.Sprintf("Average Ball Y Error: %.3f", bYErr))
+
+		t.Log(fmt.Sprintf("Average Ball VelX Error: %.3f", bVXErr))
+		t.Log(fmt.Sprintf("Average Ball VelY Error: %.3f", bVYErr))
 
 		estPoints := [][]float64{estXpos, estYpos}
 		absPoints := [][]float64{Xpos, Ypos}

@@ -7,6 +7,9 @@ type SelfData struct {
 	Y float64
 	T float64
 
+	VelX float64
+	VelY float64
+
 	// Relative Coordinates
 	NeckAngle float64
 	VelSpeed  float64

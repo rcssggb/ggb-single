@@ -1,5 +1,7 @@
 package player
 
+import "math"
+
 // bodyUpdate defines the goroutine that receives and
 // processes body sensor information received by client
 func (p *Player) bodyUpdate() {
@@ -12,6 +14,11 @@ func (p *Player) bodyUpdate() {
 		p.self.NeckAngle = data.HeadAngle
 		p.self.VelDir = data.Speed.Direction
 		p.self.VelSpeed = data.Speed.Magnitude
+
+		sin, cos := math.Sincos(math.Pi / 180.0 * (p.self.VelDir - p.self.T))
+		p.self.VelX = p.self.VelSpeed * cos
+		p.self.VelY = p.self.VelSpeed * sin
+
 		p.mutex.Unlock()
 	}
 }

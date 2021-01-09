@@ -83,8 +83,8 @@ func (p *Player) sightUpdate() {
 			p.ball.Y = p.self.Y + p.ball.Distance*sin
 			// Multiply DirChange by relative vector length and
 			// rotate the vectors to the absolute frame of reference
-			p.ball.VelX = p.ball.DistChange*cos - p.ball.DirChange*p.ball.Distance*sin
-			p.ball.VelY = p.ball.DistChange*sin + p.ball.DirChange*p.ball.Distance*cos
+			p.ball.VelX = p.ball.DistChange*cos - p.ball.DirChange*p.ball.Distance*sin - p.self.VelX
+			p.ball.VelY = p.ball.DistChange*sin + p.ball.DirChange*p.ball.Distance*cos - p.self.VelY
 		} else {
 			// If ball was not seen, increment NotSeenFor timer
 			if data.Time > lastTime {
