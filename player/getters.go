@@ -13,3 +13,17 @@ func (p *Player) GetBall() Ball {
 	defer p.mutex.RUnlock()
 	return p.ball
 }
+
+// GetSeenFriendly returns position of seen friendly players
+func (p *Player) GetSeenFriendly() map[int]SeenPlayerPosition {
+	p.mutex.RLock()
+	defer p.mutex.RUnlock()
+	return p.friendlyPlayersPos
+}
+
+// GetSeenOpponent returns position of seen opponent players
+func (p *Player) GetSeenOpponent() map[int]SeenPlayerPosition {
+	p.mutex.RLock()
+	defer p.mutex.RUnlock()
+	return p.opponentPlayersPos
+}

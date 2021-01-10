@@ -24,6 +24,11 @@ func main() {
 			continue
 		}
 
+		pp, err := player.NewPlayer("single-agent", hostName)
+		if err != nil {
+			log.Println(err)
+		}
+
 		t, err := trainerclient.NewTrainerClient(hostName)
 		if err != nil {
 			log.Println(err)
@@ -40,6 +45,7 @@ func main() {
 		var xVErr, yVErr float64
 		var bXErr, bYErr float64
 		var bVXErr, bVYErr float64
+		var seenXErr, seenYErr float64
 		var nErr float64
 
 		var estXpos, estYpos, estTpos []float64
@@ -74,11 +80,15 @@ func main() {
 				}
 			}
 			pAbsPos := t.GlobalPositions().Teams["single-agent"][1]
+			seenAbsPos := t.GlobalPositions().Teams["single-agent"][2]
 			bAbsPos := t.GlobalPositions().Ball
 			// t.Log(fmt.Sprintf("abs %.2f %.2f %.2f", pAbsPos.X, pAbsPos.Y, pAbsPos.BodyAngle))
 
+			t.MovePlayer("single-agent", 2, pAbsPos.X+5, pAbsPos.Y+2, 0, 0, 0)
+
 			pEstPos := p.GetSelfData()
 			bEstPos := p.GetBall()
+			seenEstPos := p.GetSeenFriendly()
 
 			// t.Log(fmt.Sprintf("est %.2f %.2f %.2f", xEstimate, yEstimate, tEstimate))
 			nErr++
@@ -96,6 +106,15 @@ func main() {
 			bYErr = ((nErr-1)/nErr)*bYErr + (1/nErr)*math.Abs(bEstPos.Y-bAbsPos.Y)
 			bVXErr = ((nErr-1)/nErr)*bVXErr + (1/nErr)*math.Abs(bEstPos.VelX-bAbsPos.DeltaX)
 			bVYErr = ((nErr-1)/nErr)*bVYErr + (1/nErr)*math.Abs(bEstPos.VelY-bAbsPos.DeltaY)
+
+			seenXErr = ((nErr-1)/nErr)*xErr + (1/nErr)*math.Abs(seenEstPos[2].X-seenAbsPos.X)
+			seenYErr = ((nErr-1)/nErr)*yErr + (1/nErr)*math.Abs(seenEstPos[2].Y-seenAbsPos.Y)
+
+			if seenEstPos[2].NotSeenFor == 0 {
+				t.MovePlayer("single-agent", 3, seenEstPos[2].X, seenEstPos[2].Y, 0, 0, 0)
+			} else {
+				t.MovePlayer("single-agent", 3, -52, -34, 0, 0, 0)
+			}
 
 			// Self position
 			estXpos = append(estXpos, pEstPos.X)
@@ -143,11 +162,14 @@ func main() {
 			if serverParams.SynchMode {
 				time.Sleep(2 * time.Millisecond)
 				p.Client.DoneSynch()
+				pp.Client.DoneSynch()
 				t.DoneSynch()
 				p.Client.WaitSynch()
+				pp.Client.WaitSynch()
 				t.WaitSynch()
 			} else {
 				p.Client.WaitNextStep(currentTime)
+				pp.Client.WaitNextStep(currentTime)
 				t.WaitNextStep(currentTime)
 			}
 		}
@@ -164,6 +186,9 @@ func main() {
 
 		t.Log(fmt.Sprintf("Average Ball VelX Error: %.3f", bVXErr))
 		t.Log(fmt.Sprintf("Average Ball VelY Error: %.3f", bVYErr))
+
+		t.Log(fmt.Sprintf("Average Seen Player X Error: %.3f", seenXErr))
+		t.Log(fmt.Sprintf("Average Seen Player Y Error: %.3f", seenYErr))
 
 		estPoints := [][]float64{estXpos, estYpos}
 		absPoints := [][]float64{Xpos, Ypos}
