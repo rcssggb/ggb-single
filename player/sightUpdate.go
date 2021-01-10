@@ -99,10 +99,12 @@ func (p *Player) sightUpdate() {
 			for u := range p.friendlyPlayersPos {
 				pPos := p.friendlyPlayersPos[u]
 				pPos.NotSeenFor += (uint16)(data.Time - lastTime)
+				p.friendlyPlayersPos[u] = pPos
 			}
 			for u := range p.opponentPlayersPos {
 				pPos := p.opponentPlayersPos[u]
 				pPos.NotSeenFor += (uint16)(data.Time - lastTime)
+				p.opponentPlayersPos[u] = pPos
 			}
 		}
 
@@ -122,7 +124,7 @@ func (p *Player) sightUpdate() {
 			}
 
 			// Calculate sin and cos of vector from player to object
-			sin, cos := math.Sincos(math.Pi / 180.0 * (p.self.T - seenPlayer.Direction))
+			sin, cos := math.Sincos(math.Pi / 180.0 * (seenPlayer.Direction - p.self.T))
 			// Project to absolute frame of reference
 			seenPlayerPos.X = p.self.X + seenPlayer.Distance*cos
 			seenPlayerPos.Y = p.self.Y + seenPlayer.Distance*sin
