@@ -29,6 +29,9 @@ func NewPlayer(team, host string) (*Player, error) {
 		Client: client,
 	}
 
+	p.friendlyPlayersPos = make(map[int]SeenPlayerPosition)
+	p.opponentPlayersPos = make(map[int]SeenPlayerPosition)
+
 	go p.bodyUpdate()
 	go p.sightUpdate()
 
