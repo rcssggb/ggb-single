@@ -52,6 +52,8 @@ func (p *Player) sightUpdate() {
 			p.self.T += 360
 		}
 
+		// TODO: improve p.self.T estimation when seeing 2+ flags
+
 		if data.Flags.Len() > 0 {
 			var xAcc, yAcc float64 = 0, 0
 			for _, f := range data.Flags {
@@ -83,8 +85,8 @@ func (p *Player) sightUpdate() {
 			p.ball.Y = p.self.Y + p.ball.Distance*sin
 			// Multiply DirChange by relative vector length and
 			// rotate the vectors to the absolute frame of reference
-			p.ball.VelX = p.ball.DistChange*cos - p.ball.DirChange*p.ball.Distance*sin - p.self.VelX
-			p.ball.VelY = p.ball.DistChange*sin + p.ball.DirChange*p.ball.Distance*cos - p.self.VelY
+			p.ball.VelX = p.ball.DistChange*cos - p.ball.DirChange*p.ball.Distance*sin + p.self.VelX
+			p.ball.VelY = p.ball.DistChange*sin + p.ball.DirChange*p.ball.Distance*cos + p.self.VelY
 		} else {
 			// If ball was not seen, increment NotSeenFor timer
 			if data.Time > lastTime {
@@ -130,8 +132,8 @@ func (p *Player) sightUpdate() {
 			seenPlayerPos.Y = p.self.Y + seenPlayer.Distance*sin
 			// Multiply DirChange by relative vector length and
 			// rotate the vectors to the absolute frame of reference
-			seenPlayerPos.VelX = seenPlayer.DistChange*cos - seenPlayer.DirChange*seenPlayer.Distance*sin
-			seenPlayerPos.VelY = seenPlayer.DistChange*sin + seenPlayer.DirChange*seenPlayer.Distance*cos
+			seenPlayerPos.VelX = seenPlayer.DistChange*cos - seenPlayer.DirChange*seenPlayer.Distance*sin + p.self.VelX
+			seenPlayerPos.VelY = seenPlayer.DistChange*sin + seenPlayer.DirChange*seenPlayer.Distance*cos + p.self.VelY
 
 			if seenPlayer.Team == p.Client.TeamName() {
 				p.friendlyPlayersPos[seenPlayer.Unum] = seenPlayerPos
