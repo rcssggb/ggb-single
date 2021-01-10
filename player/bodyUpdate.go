@@ -19,6 +19,10 @@ func (p *Player) bodyUpdate() {
 		p.self.VelX = p.self.VelSpeed * cos
 		p.self.VelY = p.self.VelSpeed * sin
 
+		p.self.Stamina = data.Stamina.Value
+		p.self.Effort = data.Stamina.Effort
+		p.self.Capacity = data.Stamina.Capacity
+
 		p.mutex.Unlock()
 	}
 }
