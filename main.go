@@ -43,7 +43,9 @@ func main() {
 		var nErr float64
 
 		var estXpos, estYpos, estTpos []float64
+		var estXVel, estYVel []float64
 		var Xpos, Ypos, Tpos []float64
+		var XVel, YVel []float64
 
 		var estBallX, estBallY []float64
 		var ballXpos, ballYpos []float64
@@ -87,6 +89,9 @@ func main() {
 			xVErr = ((nErr-1)/nErr)*xVErr + (1/nErr)*math.Abs(pEstPos.VelX-pAbsPos.DeltaX)
 			yVErr = ((nErr-1)/nErr)*yVErr + (1/nErr)*math.Abs(pEstPos.VelY-pAbsPos.DeltaY)
 
+			// t.Log(fmt.Sprintf("Estimated X: %f, Absolute X: %f\n", pEstPos.VelX, pAbsPos.DeltaX))
+			// t.Log(fmt.Sprintf("Estimated Y: %f, Absolute Y: %f\n", pEstPos.VelY, pAbsPos.DeltaY))
+
 			bXErr = ((nErr-1)/nErr)*bXErr + (1/nErr)*math.Abs(bEstPos.X-bAbsPos.X)
 			bYErr = ((nErr-1)/nErr)*bYErr + (1/nErr)*math.Abs(bEstPos.Y-bAbsPos.Y)
 			bVXErr = ((nErr-1)/nErr)*bVXErr + (1/nErr)*math.Abs(bEstPos.VelX-bAbsPos.DeltaX)
@@ -100,6 +105,13 @@ func main() {
 			Xpos = append(Xpos, pAbsPos.X)
 			Ypos = append(Ypos, pAbsPos.Y)
 			Tpos = append(Tpos, pAbsPos.BodyAngle)
+
+			// Self Velocity
+			estXVel = append(estXVel, pEstPos.VelX)
+			estYVel = append(estYVel, pEstPos.VelY)
+
+			XVel = append(XVel, pAbsPos.DeltaX)
+			YVel = append(YVel, pAbsPos.DeltaY)
 
 			// Ball position
 			if bEstPos.NotSeenFor == 0 {
@@ -129,6 +141,7 @@ func main() {
 			}
 
 			if serverParams.SynchMode {
+				time.Sleep(2 * time.Millisecond)
 				p.Client.DoneSynch()
 				t.DoneSynch()
 				p.Client.WaitSynch()
@@ -168,6 +181,11 @@ func main() {
 		ballEstJSON, _ := json.Marshal(ballEstPoints)
 		ballAbsJSON, _ := json.Marshal(ballAbsPoints)
 
+		estXVelJSON, _ := json.Marshal(estXVel)
+		estYVelJSON, _ := json.Marshal(estYVel)
+		absXVelJSON, _ := json.Marshal(XVel)
+		absYVelJSON, _ := json.Marshal(YVel)
+
 		ioutil.WriteFile("data/estJSON.json", estJSON, 0644)
 		ioutil.WriteFile("data/absJSON.json", absJSON, 0644)
 		ioutil.WriteFile("data/estTJSON.json", estTJSON, 0644)
@@ -175,6 +193,11 @@ func main() {
 
 		ioutil.WriteFile("data/ballEstJSON.json", ballEstJSON, 0644)
 		ioutil.WriteFile("data/ballAbsJSON.json", ballAbsJSON, 0644)
+
+		ioutil.WriteFile("data/estXVelJSON.json", estXVelJSON, 0644)
+		ioutil.WriteFile("data/estYVelJSON.json", estYVelJSON, 0644)
+		ioutil.WriteFile("data/absXVelJSON.json", absXVelJSON, 0644)
+		ioutil.WriteFile("data/absYVelJSON.json", absYVelJSON, 0644)
 
 		time.Sleep(2 * time.Second)
 	}
