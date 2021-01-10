@@ -59,23 +59,39 @@ func main() {
 		t.Start()
 
 		for {
-			sight := p.Client.See()
-			body := p.Client.SenseBody()
+			// sight := p.Client.See()
+			// body := p.Client.SenseBody()
 			currentTime := p.Client.Time()
 
 			if currentTime == 0 {
 				p.Client.Move(-30, 0)
+			} else if currentTime == 1 {
+				p.Client.Turn(-45)
 			} else {
-				if sight.Ball == nil {
+				ball := p.GetBall()
+				body := p.GetSelfData()
+				if ball.NotSeenFor != 0 {
 					p.Client.Turn(30)
 				} else {
-					ballAngle := sight.Ball.Direction + body.HeadAngle
-					ballDist := sight.Ball.Distance
+					ballAngle := ball.Direction + body.NeckAngle
+					ballDist := ball.Distance
 					if ballDist < 0.7 {
-						p.Client.Kick(20, 0)
+						if math.Abs(p.GetBall().Y) > 15 {
+							if p.GetBall().X > 0 {
+								p.Client.Kick(10, 180-p.GetSelfData().T)
+							} else {
+								p.Client.Kick(10, -p.GetSelfData().T)
+							}
+						} else {
+							if p.GetBall().Y > 0 {
+								p.Client.Kick(10, -90-p.GetSelfData().T)
+							} else {
+								p.Client.Kick(10, 90-p.GetSelfData().T)
+							}
+						}
 					} else {
 						p.Client.Dash(50, ballAngle)
-						p.Client.TurnNeck(sight.Ball.Direction / 2)
+						p.Client.TurnNeck(ball.Direction / 2)
 					}
 				}
 			}
