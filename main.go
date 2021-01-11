@@ -35,7 +35,6 @@ func main() {
 
 		time.Sleep(2 * time.Second)
 
-		serverParams := p.Client.ServerParams()
 		var xErr, yErr, tErr float64
 		var xVErr, yVErr float64
 		var bXErr, bYErr float64
@@ -57,11 +56,11 @@ func main() {
 			// body := p.Client.SenseBody()
 			currentTime := p.Client.Time()
 
+			ball := p.GetBall()
+			body := p.GetSelfData()
 			if currentTime == 0 {
 				p.Client.Move(-30, 0)
 			} else {
-				ball := p.GetBall()
-				body := p.GetSelfData()
 				if ball.NotSeenFor != 0 {
 					p.Client.Turn(20)
 				} else {
@@ -158,15 +157,8 @@ func main() {
 				// time.Sleep(10 * time.Millisecond)
 			}
 
-			if serverParams.SynchMode {
-				p.Client.DoneSynch()
-				t.DoneSynch()
-				p.Client.WaitSynch()
-				t.WaitSynch()
-			} else {
-				p.Client.WaitNextStep(currentTime)
-				t.WaitNextStep(currentTime)
-			}
+			t.DoneSynch()
+			p.WaitCycle()
 		}
 
 		t.Log(fmt.Sprintf("Average X Error: %.3f", xErr))
