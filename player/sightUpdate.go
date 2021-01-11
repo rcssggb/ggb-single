@@ -84,7 +84,7 @@ func (p *Player) sightUpdate() {
 
 			/* Absolute coordinates */
 			// Calculate sin and cos of vector from player to object
-			sin, cos := math.Sincos(math.Pi / 180.0 * (p.self.T + p.self.NeckAngle - p.ball.Direction))
+			sin, cos := math.Sincos(math.Pi / 180.0 * (p.self.T + p.self.NeckAngle + p.ball.Direction))
 			// Project to absolute frame of reference
 			p.ball.X = p.self.X + ball.Distance*cos
 			p.ball.Y = p.self.Y + ball.Distance*sin
