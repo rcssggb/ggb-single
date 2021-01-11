@@ -125,12 +125,21 @@ func main() {
 
 	plotYVel.SavePlot("plotYVel.png")
 
-	// Plot Ball position
-	plotBallPos, _ := glot.NewPlot(2, false, false)
-	plotBallPos.SetTitle("Ball Pos")
+	// Plot Ball X
+	plotBallX, _ := glot.NewPlot(1, false, false)
+	plotBallX.SetTitle("Ball Pos X")
 
-	plotBallPos.AddPointGroup("estimated", "lines", ballEstPoints)
-	plotBallPos.AddPointGroup("absolute", "lines", ballAbsPoints)
+	plotBallX.AddPointGroup("estimated", "lines", ballEstPoints[0])
+	plotBallX.AddPointGroup("absolute", "lines", ballAbsPoints[0])
 
-	plotBallPos.SavePlot("plotBallPos.png")
+	plotBallX.SavePlot("plotBallX.png")
+
+	// Plot Ball Y
+	plotBallY, _ := glot.NewPlot(1, false, false)
+	plotBallY.SetTitle("Ball Pos Y")
+
+	plotBallY.AddPointGroup("estimated", "lines", ballEstPoints[1])
+	plotBallY.AddPointGroup("absolute", "lines", ballAbsPoints[1])
+
+	plotBallY.SavePlot("plotBallY.png")
 }
