@@ -7,7 +7,7 @@ type Ball struct {
 
 	// Relative polar coordinates
 	Distance   float64
-	Direction  float64 // relative to body direction, not head direction
+	Direction  float64
 	DistChange float64
 	DirChange  float64
 

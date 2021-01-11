@@ -14,7 +14,6 @@ func (p *Player) sightUpdate() {
 	for {
 		p.Client.WaitSight()
 		p.mutex.Lock()
-
 		data := p.Client.See()
 
 		var closestLine *parser.LineData
@@ -58,7 +57,7 @@ func (p *Player) sightUpdate() {
 			var xAcc, yAcc float64 = 0, 0
 			for _, f := range data.Flags {
 				xFlag, yFlag := f.ID.Position()
-				absAngle := (3.14159 / 180.0) * (f.Direction + p.self.T + p.self.NeckAngle)
+				absAngle := (math.Pi / 180.0) * (f.Direction + p.self.T + p.self.NeckAngle)
 				xTmp := xFlag - math.Cos(absAngle)*f.Distance
 				yTmp := yFlag - math.Sin(absAngle)*f.Distance
 				xAcc += xTmp
@@ -73,7 +72,7 @@ func (p *Player) sightUpdate() {
 
 			// Relative coordinates
 			p.ball.Distance = data.Ball.Distance
-			p.ball.Direction = data.Ball.Direction - p.self.NeckAngle
+			p.ball.Direction = data.Ball.Direction
 			p.ball.DistChange = data.Ball.DistChange
 			p.ball.DirChange = data.Ball.DirChange
 
