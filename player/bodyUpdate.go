@@ -15,7 +15,7 @@ func (p *Player) bodyUpdate() {
 		p.self.VelDir = data.Speed.Direction
 		p.self.VelSpeed = data.Speed.Magnitude
 
-		sin, cos := math.Sincos(math.Pi / 180.0 * (p.self.T + p.self.NeckAngle - p.self.VelDir))
+		sin, cos := math.Sincos(math.Pi / 180.0 * (p.self.T + p.self.NeckAngle + p.self.VelDir))
 		p.self.VelX = p.self.VelSpeed * cos
 		p.self.VelY = p.self.VelSpeed * sin
 
