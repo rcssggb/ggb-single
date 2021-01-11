@@ -56,6 +56,10 @@ func main() {
 			// body := p.Client.SenseBody()
 			currentTime := p.Client.Time()
 
+			if currentTime != 0 {
+				// time.Sleep(200 * time.Millisecond)
+			}
+
 			ball := p.GetBall()
 			body := p.GetSelfData()
 			if currentTime == 0 {
@@ -67,31 +71,34 @@ func main() {
 					ballAngle := ball.Direction + body.NeckAngle
 					ballDist := ball.Distance
 					if ballDist < 0.7 {
-						if math.Abs(p.GetBall().Y) > 15 {
-							if p.GetBall().X > 0 {
+						if math.Abs(ball.Y) > 15 {
+							if ball.X > 0 {
 								p.Client.Kick(40, 180-body.T)
 							} else {
 								p.Client.Kick(40, -body.T)
 							}
 						} else {
-							if p.GetBall().Y > 0 {
+							if ball.Y > 0 {
 								p.Client.Kick(40, -90-body.T)
 							} else {
 								p.Client.Kick(40, 90-body.T)
 							}
 						}
 					} else {
-						p.Client.Dash(50, ballAngle)
+						p.Client.Dash(30, ballAngle)
 						p.Client.TurnNeck(ball.Direction / 2)
 					}
 				}
 			}
+
+			t.MovePlayer("single-agent", 2, ball.X+2, ball.Y+2, 0, 0, 0)
+
 			pAbsPos := t.GlobalPositions().Teams["single-agent"][1]
 			bAbsPos := t.GlobalPositions().Ball
 			// t.Log(fmt.Sprintf("abs %.2f %.2f %.2f", pAbsPos.X, pAbsPos.Y, pAbsPos.BodyAngle))
 
-			pEstPos := p.GetSelfData()
-			bEstPos := p.GetBall()
+			pEstPos := body
+			bEstPos := ball
 
 			// t.Log(fmt.Sprintf("est %.2f %.2f %.2f", xEstimate, yEstimate, tEstimate))
 			nErr++
@@ -151,10 +158,6 @@ func main() {
 			for err != nil {
 				p.Client.Log(err)
 				err = p.Client.Error()
-			}
-
-			if currentTime != 0 {
-				// time.Sleep(10 * time.Millisecond)
 			}
 
 			t.DoneSynch()
