@@ -3,7 +3,6 @@ package player
 import (
 	"math"
 
-	"github.com/rcssggb/ggb-lib/playerclient/parser"
 	"github.com/rcssggb/ggb-lib/rcsscommon"
 )
 
@@ -16,10 +15,10 @@ func (p *Player) sightUpdate() {
 		p.mutex.Lock()
 		data := p.Client.See()
 
-		var closestLine *parser.LineData
-		closestLine = nil
+		var selfAngleSamples []float64
 		if data.Lines.Len() > 0 {
-			closestLine = &data.Lines[0]
+			var selfAngle float64
+			closestLine := data.Lines[0]
 			lDir := closestLine.Direction
 			if lDir < 0 {
 				lDir += 90
@@ -28,30 +27,36 @@ func (p *Player) sightUpdate() {
 			}
 			switch closestLine.ID {
 			case rcsscommon.LineRight:
-				p.self.T = 0 - lDir
+				selfAngle = 0 - lDir
 			case rcsscommon.LineBottom:
-				p.self.T = 90 - lDir
+				selfAngle = 90 - lDir
 			case rcsscommon.LineLeft:
-				p.self.T = 180 - lDir
+				selfAngle = 180 - lDir
 			case rcsscommon.LineTop:
-				p.self.T = -90 - lDir
+				selfAngle = -90 - lDir
 			}
+
+			// If you see 2 lines it means you're outside the field
+			if data.Lines.Len() >= 2 {
+				selfAngle += 180
+			}
+
+			selfAngle -= p.self.NeckAngle
+
+			if selfAngle > 180 {
+				selfAngle -= 360
+			} else if selfAngle < -180 {
+				selfAngle += 360
+			}
+
+			selfAngleSamples = append(selfAngleSamples, selfAngle)
 		}
+		// TODO: improve number of samples selfAngleSamples when seeing 2+ flags
 
-		// If you see 2 lines it means you're outside the field
-		if data.Lines.Len() >= 2 {
-			p.self.T += 180
+		if len(selfAngleSamples) > 0 {
+			// TODO: calculate sample average
+			p.self.T = selfAngleSamples[0]
 		}
-
-		p.self.T -= p.self.NeckAngle
-
-		if p.self.T > 180 {
-			p.self.T -= 360
-		} else if p.self.T < -180 {
-			p.self.T += 360
-		}
-
-		// TODO: improve p.self.T estimation when seeing 2+ flags
 
 		if data.Flags.Len() > 0 {
 			var xAcc, yAcc float64 = 0, 0
@@ -80,12 +85,12 @@ func (p *Player) sightUpdate() {
 			// Calculate sin and cos of vector from player to object
 			sin, cos := math.Sincos(math.Pi / 180.0 * (p.self.T + p.self.NeckAngle - p.ball.Direction))
 			// Project to absolute frame of reference
-			p.ball.X = p.self.X + p.ball.Distance*cos
-			p.ball.Y = p.self.Y + p.ball.Distance*sin
+			p.ball.X = p.self.X + data.Ball.Distance*cos
+			p.ball.Y = p.self.Y + data.Ball.Distance*sin
 			// Multiply DirChange by relative vector length and
 			// rotate the vectors to the absolute frame of reference
-			p.ball.VelX = p.ball.DistChange*cos - p.ball.DirChange*p.ball.Distance*sin + p.self.VelX
-			p.ball.VelY = p.ball.DistChange*sin + p.ball.DirChange*p.ball.Distance*cos + p.self.VelY
+			p.ball.VelX = data.Ball.DistChange*cos - data.Ball.DirChange*data.Ball.Distance*sin + p.self.VelX
+			p.ball.VelY = data.Ball.DistChange*sin + data.Ball.DirChange*data.Ball.Distance*cos + p.self.VelY
 		} else {
 			// If ball was not seen, increment NotSeenFor timer
 			if data.Time > lastTime {
