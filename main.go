@@ -100,8 +100,6 @@ func main() {
 			bAbsPos := t.GlobalPositions().Ball
 			// t.Log(fmt.Sprintf("abs %.2f %.2f %.2f", pAbsPos.X, pAbsPos.Y, pAbsPos.BodyAngle))
 
-			t.MovePlayer("single-agent", 2, pAbsPos.X+5, pAbsPos.Y+2, 0, 0, 0)
-
 			pEstPos := p.GetSelfData()
 			bEstPos := p.GetBall()
 			seenEstPos := p.GetSeenFriendly()
@@ -110,7 +108,11 @@ func main() {
 			nErr++
 			xErr = ((nErr-1)/nErr)*xErr + (1/nErr)*math.Abs(pEstPos.X-pAbsPos.X)
 			yErr = ((nErr-1)/nErr)*yErr + (1/nErr)*math.Abs(pEstPos.Y-pAbsPos.Y)
-			tErr = ((nErr-1)/nErr)*tErr + (1/nErr)*math.Abs(pEstPos.T-pAbsPos.BodyAngle)
+			absTErr := math.Abs(pEstPos.T - pAbsPos.BodyAngle)
+			if absTErr > 180 {
+				absTErr -= 360
+			}
+			tErr = ((nErr-1)/nErr)*tErr + (1/nErr)*absTErr
 
 			xVErr = ((nErr-1)/nErr)*xVErr + (1/nErr)*math.Abs(pEstPos.VelX-pAbsPos.DeltaX)
 			yVErr = ((nErr-1)/nErr)*yVErr + (1/nErr)*math.Abs(pEstPos.VelY-pAbsPos.DeltaY)
@@ -126,11 +128,13 @@ func main() {
 			seenXErr = ((nErr-1)/nErr)*xErr + (1/nErr)*math.Abs(seenEstPos[2].X-seenAbsPos.X)
 			seenYErr = ((nErr-1)/nErr)*yErr + (1/nErr)*math.Abs(seenEstPos[2].Y-seenAbsPos.Y)
 
-			if seenEstPos[2].NotSeenFor == 0 {
-				t.MovePlayer("single-agent", 3, seenEstPos[2].X, seenEstPos[2].Y, 0, 0, 0)
-			} else {
-				t.MovePlayer("single-agent", 3, -52, -34, 0, 0, 0)
-			}
+			// if seenEstPos[2].NotSeenFor == 0 {
+			// 	t.MovePlayer("single-agent", 3, seenEstPos[2].X, seenEstPos[2].Y, 0, 0, 0)
+			// } else {
+			// 	t.MovePlayer("single-agent", 3, -52, -34, 0, 0, 0)
+			// }
+
+			t.MovePlayer("single-agent", 2, pAbsPos.X+5, pAbsPos.Y+2, pEstPos.T, 0, 0)
 
 			// Self position
 			estXpos = append(estXpos, pEstPos.X)
@@ -176,7 +180,7 @@ func main() {
 			}
 
 			if serverParams.SynchMode {
-				time.Sleep(2 * time.Millisecond)
+				time.Sleep(30 * time.Millisecond)
 				p.Client.DoneSynch()
 				pp.Client.DoneSynch()
 				t.DoneSynch()
