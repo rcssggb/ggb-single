@@ -23,6 +23,9 @@ func main() {
 	ballEstJSON, _ := ioutil.ReadFile("ballEstJSON.json")
 	ballAbsJSON, _ := ioutil.ReadFile("ballAbsJSON.json")
 
+	ballEstVelJSON, _ := ioutil.ReadFile("ballEstVelJSON.json")
+	ballAbsVelJSON, _ := ioutil.ReadFile("ballAbsVelJSON.json")
+
 	var estPoints, absPoints [][]float64
 	var estTPoints, absTPoints []float64
 
@@ -30,6 +33,7 @@ func main() {
 	var estYVelPoints, absYVelPoints []float64
 
 	var ballEstPoints, ballAbsPoints [][]float64
+	var ballEstVelPoints, ballAbsVelPoints [][]float64
 
 	var err error
 	// Unmarshal self pos
@@ -88,6 +92,17 @@ func main() {
 		return
 	}
 
+	err = json.Unmarshal(ballEstVelJSON, &ballEstVelPoints)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	err = json.Unmarshal(ballAbsVelJSON, &ballAbsVelPoints)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
 	// Plot self position
 	plotPos, _ := glot.NewPlot(2, false, false)
 
@@ -125,6 +140,15 @@ func main() {
 
 	plotYVel.SavePlot("plotYVel.png")
 
+	// Plot Ball
+	plotBall, _ := glot.NewPlot(2, false, false)
+	plotBall.SetTitle("Ball Pos")
+
+	plotBall.AddPointGroup("estimated", "lines", ballEstPoints)
+	plotBall.AddPointGroup("absolute", "lines", ballAbsPoints)
+
+	plotBall.SavePlot("plotBallPos.png")
+
 	// Plot Ball X
 	plotBallX, _ := glot.NewPlot(1, false, false)
 	plotBallX.SetTitle("Ball Pos X")
@@ -142,4 +166,22 @@ func main() {
 	plotBallY.AddPointGroup("absolute", "lines", ballAbsPoints[1])
 
 	plotBallY.SavePlot("plotBallY.png")
+
+	// Plot Ball Vel X
+	plotBallVelX, _ := glot.NewPlot(1, true, false)
+	plotBallVelX.SetTitle("Ball Vel X")
+
+	plotBallVelX.AddPointGroup("estimated", "lines", ballEstVelPoints[0])
+	plotBallVelX.AddPointGroup("absolute", "lines", ballAbsVelPoints[0])
+
+	plotBallVelX.SavePlot("plotBallVelX.png")
+
+	// Plot Ball Vel Y
+	plotBallVelY, _ := glot.NewPlot(1, true, false)
+	plotBallVelY.SetTitle("Ball Vel Y")
+
+	plotBallVelY.AddPointGroup("estimated", "lines", ballEstVelPoints[1])
+	plotBallVelY.AddPointGroup("absolute", "lines", ballAbsVelPoints[1])
+
+	plotBallVelY.SavePlot("plotBallVelY.png")
 }

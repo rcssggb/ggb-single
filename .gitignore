@@ -5,3 +5,5 @@ logs/*
 *.json
 
 *.png
+
+.DS_Store

@@ -47,7 +47,9 @@ func main() {
 		var XVel, YVel []float64
 
 		var estBallX, estBallY []float64
+		var estVelBallX, estVelBallY []float64
 		var ballXpos, ballYpos []float64
+		var ballXVel, ballYVel []float64
 
 		t.Start()
 
@@ -144,6 +146,13 @@ func main() {
 			ballXpos = append(ballXpos, bAbsPos.X)
 			ballYpos = append(ballYpos, bAbsPos.Y)
 
+			// Ball Velocity
+			estVelBallX = append(estVelBallX, bEstPos.VelX)
+			estVelBallY = append(estVelBallY, bEstPos.VelY)
+
+			ballXVel = append(ballXVel, bAbsPos.DeltaX)
+			ballYVel = append(ballYVel, bAbsPos.DeltaY)
+
 			if p.Client.PlayMode() == "time_over" {
 				p.Client.Bye()
 				break
@@ -178,6 +187,9 @@ func main() {
 		ballEstPoints := [][]float64{estBallX, estBallY}
 		ballAbsPoints := [][]float64{ballXpos, ballYpos}
 
+		ballEstVelPoints := [][]float64{estVelBallX, estVelBallY}
+		ballAbsVelPoints := [][]float64{ballXVel, ballYVel}
+
 		fmt.Println("Saving estimations...")
 
 		estJSON, _ := json.Marshal(estPoints)
@@ -193,6 +205,9 @@ func main() {
 		absXVelJSON, _ := json.Marshal(XVel)
 		absYVelJSON, _ := json.Marshal(YVel)
 
+		ballEstVelJSON, _ := json.Marshal(ballEstVelPoints)
+		ballAbsVelJSON, _ := json.Marshal(ballAbsVelPoints)
+
 		ioutil.WriteFile("data/estJSON.json", estJSON, 0644)
 		ioutil.WriteFile("data/absJSON.json", absJSON, 0644)
 		ioutil.WriteFile("data/estTJSON.json", estTJSON, 0644)
@@ -200,6 +215,8 @@ func main() {
 
 		ioutil.WriteFile("data/ballEstJSON.json", ballEstJSON, 0644)
 		ioutil.WriteFile("data/ballAbsJSON.json", ballAbsJSON, 0644)
+		ioutil.WriteFile("data/ballEstVelJSON.json", ballEstVelJSON, 0644)
+		ioutil.WriteFile("data/ballAbsVelJSON.json", ballAbsVelJSON, 0644)
 
 		ioutil.WriteFile("data/estXVelJSON.json", estXVelJSON, 0644)
 		ioutil.WriteFile("data/estYVelJSON.json", estYVelJSON, 0644)
