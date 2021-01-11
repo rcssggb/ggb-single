@@ -180,7 +180,6 @@ func main() {
 			}
 
 			if serverParams.SynchMode {
-				time.Sleep(30 * time.Millisecond)
 				p.Client.DoneSynch()
 				pp.Client.DoneSynch()
 				t.DoneSynch()
