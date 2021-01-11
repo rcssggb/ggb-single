@@ -73,24 +73,25 @@ func (p *Player) sightUpdate() {
 		}
 
 		if data.Ball != nil {
+			ball := *data.Ball
 			p.ball.NotSeenFor = 0
 
 			// Relative coordinates
-			p.ball.Distance = data.Ball.Distance
-			p.ball.Direction = data.Ball.Direction
-			p.ball.DistChange = data.Ball.DistChange
-			p.ball.DirChange = data.Ball.DirChange
+			p.ball.Distance = ball.Distance
+			p.ball.Direction = ball.Direction
+			p.ball.DistChange = ball.DistChange
+			p.ball.DirChange = ball.DirChange
 
 			/* Absolute coordinates */
 			// Calculate sin and cos of vector from player to object
 			sin, cos := math.Sincos(math.Pi / 180.0 * (p.self.T + p.self.NeckAngle - p.ball.Direction))
 			// Project to absolute frame of reference
-			p.ball.X = p.self.X + data.Ball.Distance*cos
-			p.ball.Y = p.self.Y + data.Ball.Distance*sin
+			p.ball.X = p.self.X + ball.Distance*cos
+			p.ball.Y = p.self.Y + ball.Distance*sin
 			// Multiply DirChange by relative vector length and
 			// rotate the vectors to the absolute frame of reference
-			p.ball.VelX = data.Ball.DistChange*cos - data.Ball.DirChange*data.Ball.Distance*sin + p.self.VelX
-			p.ball.VelY = data.Ball.DistChange*sin + data.Ball.DirChange*data.Ball.Distance*cos + p.self.VelY
+			p.ball.VelX = ball.DistChange*cos - ball.DirChange*ball.Distance*sin + p.self.VelX
+			p.ball.VelY = ball.DistChange*sin + ball.DirChange*ball.Distance*cos + p.self.VelY
 		} else {
 			// If ball was not seen, increment NotSeenFor timer
 			if data.Time > lastTime {
