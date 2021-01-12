@@ -24,6 +24,12 @@ func main() {
 			continue
 		}
 
+		pp, err := player.NewPlayer("single-agent", hostName)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+
 		t, err := trainerclient.NewTrainerClient(hostName)
 		if err != nil {
 			log.Println(err)
@@ -46,6 +52,11 @@ func main() {
 		var Xpos, Ypos, Tpos []float64
 		var XVel, YVel []float64
 
+		var seenEstXpos, seenEstYpos []float64
+		var seenAbsXpos, seenAbsYpos []float64
+		var seenEstXvel, seenEstYvel []float64
+		var seenAbsXvel, seenAbsYvel []float64
+
 		var estBallX, estBallY []float64
 		var estVelBallX, estVelBallY []float64
 		var ballXpos, ballYpos []float64
@@ -64,8 +75,10 @@ func main() {
 
 			ball := p.GetBall()
 			body := p.GetSelfData()
+			seenPlayers := p.GetSeenFriendly()
 			if currentTime == 0 {
 				p.Client.Move(-30, 0)
+				pp.Client.Move(-10, 0)
 			} else {
 				if ball.NotSeenFor != 0 {
 					p.Client.Turn(20)
@@ -75,15 +88,15 @@ func main() {
 					if ballDist < 0.7 {
 						if math.Abs(ball.Y) < 15 {
 							if ball.X > 0 {
-								p.Client.Kick(40, 180-body.T)
+								p.Client.Kick(20, 180-body.T)
 							} else {
-								p.Client.Kick(40, -body.T)
+								p.Client.Kick(20, -body.T)
 							}
 						} else {
 							if ball.Y > 0 {
-								p.Client.Kick(40, -90-body.T)
+								p.Client.Kick(20, -90-body.T)
 							} else {
-								p.Client.Kick(40, 90-body.T)
+								p.Client.Kick(20, 90-body.T)
 							}
 						}
 					} else {
@@ -93,14 +106,15 @@ func main() {
 				}
 			}
 
-			t.MovePlayer("single-agent", 2, ball.X+2, ball.Y+2, 0, 0, 0)
-
 			pAbsPos := t.GlobalPositions().Teams["single-agent"][1]
+			seenAbsPos := t.GlobalPositions().Teams["single-agent"][2]
 			bAbsPos := t.GlobalPositions().Ball
 			// t.Log(fmt.Sprintf("abs %.2f %.2f %.2f", pAbsPos.X, pAbsPos.Y, pAbsPos.BodyAngle))
 
 			pEstPos := body
 			bEstPos := ball
+
+			t.MovePlayer("single-agent", 2, bAbsPos.X+2, bAbsPos.Y+2, 0, bAbsPos.DeltaX, bAbsPos.DeltaY)
 
 			// t.Log(fmt.Sprintf("est %.2f %.2f %.2f", xEstimate, yEstimate, tEstimate))
 			nErr++
@@ -153,6 +167,20 @@ func main() {
 			ballXVel = append(ballXVel, bAbsPos.DeltaX)
 			ballYVel = append(ballYVel, bAbsPos.DeltaY)
 
+			// Seen Player position
+			seenEstXpos = append(seenEstXpos, seenPlayers[2].X)
+			seenEstYpos = append(seenEstYpos, seenPlayers[2].Y)
+
+			seenAbsXpos = append(seenAbsXpos, seenAbsPos.X)
+			seenAbsYpos = append(seenAbsYpos, seenAbsPos.Y)
+
+			// Seen Player Velocity
+			seenEstXvel = append(seenEstXvel, seenPlayers[2].VelX)
+			seenEstYvel = append(seenEstYvel, seenPlayers[2].VelY)
+
+			seenAbsXvel = append(seenAbsXvel, seenAbsPos.DeltaX)
+			seenAbsYvel = append(seenAbsYvel, seenAbsPos.DeltaY)
+
 			if p.Client.PlayMode() == "time_over" {
 				p.Client.Bye()
 				break
@@ -166,6 +194,7 @@ func main() {
 
 			t.DoneSynch()
 			p.WaitCycle()
+			pp.WaitCycle()
 		}
 
 		t.Log(fmt.Sprintf("Average X Error: %.3f", xErr))
@@ -190,6 +219,11 @@ func main() {
 		ballEstVelPoints := [][]float64{estVelBallX, estVelBallY}
 		ballAbsVelPoints := [][]float64{ballXVel, ballYVel}
 
+		seenEstPoints := [][]float64{seenEstXpos, seenEstYpos}
+		seenAbsPoints := [][]float64{seenAbsXpos, seenAbsYpos}
+		seenEstVelPoints := [][]float64{seenEstXvel, seenEstYvel}
+		seenAbsVelPoints := [][]float64{seenAbsXvel, seenAbsYvel}
+
 		fmt.Println("Saving estimations...")
 
 		estJSON, _ := json.Marshal(estPoints)
@@ -204,6 +238,11 @@ func main() {
 		estYVelJSON, _ := json.Marshal(estYVel)
 		absXVelJSON, _ := json.Marshal(XVel)
 		absYVelJSON, _ := json.Marshal(YVel)
+
+		seenEstPointsJSON, _ := json.Marshal(seenEstPoints)
+		seenAbsPointsJSON, _ := json.Marshal(seenAbsPoints)
+		seenEstVelPointsJSON, _ := json.Marshal(seenEstVelPoints)
+		seenAbsVelPointsJSON, _ := json.Marshal(seenAbsVelPoints)
 
 		ballEstVelJSON, _ := json.Marshal(ballEstVelPoints)
 		ballAbsVelJSON, _ := json.Marshal(ballAbsVelPoints)
@@ -222,6 +261,11 @@ func main() {
 		ioutil.WriteFile("data/estYVelJSON.json", estYVelJSON, 0644)
 		ioutil.WriteFile("data/absXVelJSON.json", absXVelJSON, 0644)
 		ioutil.WriteFile("data/absYVelJSON.json", absYVelJSON, 0644)
+
+		ioutil.WriteFile("data/seenEstPointsJSON.json", seenEstPointsJSON, 0644)
+		ioutil.WriteFile("data/seenAbsPointsJSON.json", seenAbsPointsJSON, 0644)
+		ioutil.WriteFile("data/seenEstVelPointsJSON.json", seenEstVelPointsJSON, 0644)
+		ioutil.WriteFile("data/seenAbsVelPointsJSON.json", seenAbsVelPointsJSON, 0644)
 
 		time.Sleep(2 * time.Second)
 	}

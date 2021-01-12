@@ -26,6 +26,11 @@ func main() {
 	ballEstVelJSON, _ := ioutil.ReadFile("ballEstVelJSON.json")
 	ballAbsVelJSON, _ := ioutil.ReadFile("ballAbsVelJSON.json")
 
+	seenEstPointsJSON, _ := ioutil.ReadFile("seenEstPointsJSON.json")
+	seenAbsPointsJSON, _ := ioutil.ReadFile("seenAbsPointsJSON.json")
+	seenEstVelPointsJSON, _ := ioutil.ReadFile("seenEstVelPointsJSON.json")
+	seenAbsVelPointsJSON, _ := ioutil.ReadFile("seenAbsVelPointsJSON.json")
+
 	var estPoints, absPoints [][]float64
 	var estTPoints, absTPoints []float64
 
@@ -34,6 +39,9 @@ func main() {
 
 	var ballEstPoints, ballAbsPoints [][]float64
 	var ballEstVelPoints, ballAbsVelPoints [][]float64
+
+	var seenEstPoints, seenAbsPoints [][]float64
+	var seenEstVelPoints, seenAbsVelPoints [][]float64
 
 	var err error
 	// Unmarshal self pos
@@ -98,6 +106,29 @@ func main() {
 		return
 	}
 	err = json.Unmarshal(ballAbsVelJSON, &ballAbsVelPoints)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	// Unmarshal seen player info
+	err = json.Unmarshal(seenEstPointsJSON, &seenEstPoints)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	err = json.Unmarshal(seenAbsPointsJSON, &seenAbsPoints)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	err = json.Unmarshal(seenEstVelPointsJSON, &seenEstVelPoints)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	err = json.Unmarshal(seenAbsVelPointsJSON, &seenAbsVelPoints)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -184,4 +215,38 @@ func main() {
 	plotBallVelY.AddPointGroup("absolute", "lines", ballAbsVelPoints[1][:1000])
 
 	plotBallVelY.SavePlot("plotBallVelY.png")
+
+	// Plot seen player position
+	plotSeenPX, _ := glot.NewPlot(1, false, false)
+	plotSeenPX.SetTitle("Seen Player X")
+
+	plotSeenPX.AddPointGroup("estimated", "lines", seenEstPoints[0][:3000])
+	plotSeenPX.AddPointGroup("absolute", "lines", seenAbsPoints[0][:3000])
+
+	plotSeenPX.SavePlot("plotSeenPX.png")
+
+	plotSeenPY, _ := glot.NewPlot(1, false, false)
+	plotSeenPY.SetTitle("Seen Player Y")
+
+	plotSeenPY.AddPointGroup("estimated", "lines", seenEstPoints[1][:3000])
+	plotSeenPY.AddPointGroup("absolute", "lines", seenAbsPoints[1][:3000])
+
+	plotSeenPY.SavePlot("plotSeenPY.png")
+
+	plotSeenPXVel, _ := glot.NewPlot(1, false, false)
+	plotSeenPXVel.SetTitle("Seen Player X Vel")
+
+	plotSeenPXVel.AddPointGroup("estimated", "lines", seenEstVelPoints[0][:1000])
+	plotSeenPXVel.AddPointGroup("absolute", "lines", seenAbsVelPoints[0][:1000])
+
+	plotSeenPXVel.SavePlot("plotSeenPXVel.png")
+
+	plotSeenPYvale, _ := glot.NewPlot(1, false, false)
+	plotSeenPYvale.SetTitle("Seen Player Y Vel")
+
+	plotSeenPYvale.AddPointGroup("estimated", "lines", seenEstVelPoints[1][:1000])
+	plotSeenPYvale.AddPointGroup("absolute", "lines", seenAbsVelPoints[1][:1000])
+
+	plotSeenPYvale.SavePlot("plotSeenPYVel.png")
+
 }
