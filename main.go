@@ -73,7 +73,7 @@ func main() {
 					ballAngle := ball.Direction + body.NeckAngle
 					ballDist := ball.Distance
 					if ballDist < 0.7 {
-						if math.Abs(ball.Y) > 15 {
+						if math.Abs(ball.Y) < 15 {
 							if ball.X > 0 {
 								p.Client.Kick(40, 180-body.T)
 							} else {

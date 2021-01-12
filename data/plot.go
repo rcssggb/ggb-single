@@ -168,20 +168,20 @@ func main() {
 	plotBallY.SavePlot("plotBallY.png")
 
 	// Plot Ball Vel X
-	plotBallVelX, _ := glot.NewPlot(1, true, false)
+	plotBallVelX, _ := glot.NewPlot(1, false, false)
 	plotBallVelX.SetTitle("Ball Vel X")
 
-	plotBallVelX.AddPointGroup("estimated", "lines", ballEstVelPoints[0])
-	plotBallVelX.AddPointGroup("absolute", "lines", ballAbsVelPoints[0])
+	plotBallVelX.AddPointGroup("estimated", "lines", ballEstVelPoints[0][:1000])
+	plotBallVelX.AddPointGroup("absolute", "lines", ballAbsVelPoints[0][:1000])
 
 	plotBallVelX.SavePlot("plotBallVelX.png")
 
 	// Plot Ball Vel Y
-	plotBallVelY, _ := glot.NewPlot(1, true, false)
+	plotBallVelY, _ := glot.NewPlot(1, false, false)
 	plotBallVelY.SetTitle("Ball Vel Y")
 
-	plotBallVelY.AddPointGroup("estimated", "lines", ballEstVelPoints[1])
-	plotBallVelY.AddPointGroup("absolute", "lines", ballAbsVelPoints[1])
+	plotBallVelY.AddPointGroup("estimated", "lines", ballEstVelPoints[1][:1000])
+	plotBallVelY.AddPointGroup("absolute", "lines", ballAbsVelPoints[1][:1000])
 
 	plotBallVelY.SavePlot("plotBallVelY.png")
 }

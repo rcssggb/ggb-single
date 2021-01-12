@@ -90,8 +90,8 @@ func (p *Player) sightUpdate() {
 			p.ball.Y = p.self.Y + ball.Distance*sin
 			// Multiply DirChange by relative vector length and
 			// rotate the vectors to the absolute frame of reference
-			p.ball.VelX = ball.DistChange*cos - ball.DirChange*ball.Distance*sin + p.self.VelX
-			p.ball.VelY = ball.DistChange*sin + ball.DirChange*ball.Distance*cos + p.self.VelY
+			p.ball.VelX = ball.DistChange*cos - (math.Pi/180.0)*ball.DirChange*ball.Distance*sin + p.self.VelX
+			p.ball.VelY = ball.DistChange*sin + (math.Pi/180.0)*ball.DirChange*ball.Distance*cos + p.self.VelY
 		} else {
 			// If ball was not seen, increment NotSeenFor timer
 			if data.Time > lastTime {
@@ -137,8 +137,8 @@ func (p *Player) sightUpdate() {
 			seenPlayerPos.Y = p.self.Y + seenPlayer.Distance*sin
 			// Multiply DirChange by relative vector length and
 			// rotate the vectors to the absolute frame of reference
-			seenPlayerPos.VelX = seenPlayer.DistChange*cos - seenPlayer.DirChange*seenPlayer.Distance*sin + p.self.VelX
-			seenPlayerPos.VelY = seenPlayer.DistChange*sin + seenPlayer.DirChange*seenPlayer.Distance*cos + p.self.VelY
+			seenPlayerPos.VelX = seenPlayer.DistChange*cos - (math.Pi/180.0)*seenPlayer.DirChange*seenPlayer.Distance*sin + p.self.VelX
+			seenPlayerPos.VelY = seenPlayer.DistChange*sin + (math.Pi/180.0)*seenPlayer.DirChange*seenPlayer.Distance*cos + p.self.VelY
 
 			if seenPlayer.Team == p.Client.TeamName() {
 				p.friendlyPlayersPos[seenPlayer.Unum] = seenPlayerPos
