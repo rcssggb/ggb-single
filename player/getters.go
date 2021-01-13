@@ -18,12 +18,20 @@ func (p *Player) GetBall() Ball {
 func (p *Player) GetSeenFriendly() map[int]SeenPlayerPosition {
 	p.mutex.RLock()
 	defer p.mutex.RUnlock()
-	return p.friendlyPlayersPos
+	ret := make(map[int]SeenPlayerPosition)
+	for k, v := range p.friendlyPlayersPos {
+		ret[k] = v
+	}
+	return ret
 }
 
 // GetSeenOpponent returns position of seen opponent players
 func (p *Player) GetSeenOpponent() map[int]SeenPlayerPosition {
 	p.mutex.RLock()
 	defer p.mutex.RUnlock()
-	return p.opponentPlayersPos
+	ret := make(map[int]SeenPlayerPosition)
+	for k, v := range p.opponentPlayersPos {
+		ret[k] = v
+	}
+	return ret
 }
