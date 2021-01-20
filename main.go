@@ -71,7 +71,7 @@ func main() {
 				}
 			}
 
-			if p.Client.PlayMode() == "time_over" {
+			if p.Client.PlayMode().String() == "time_over" {
 				p.Client.Bye()
 				break
 			}
