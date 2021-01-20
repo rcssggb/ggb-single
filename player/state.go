@@ -4,7 +4,8 @@ package player
 func (p *Player) State() []float64 {
 	self := p.GetSelfData()
 	ball := p.GetBall()
-	return []float64{
+	playModeOneHot := p.Client.PlayMode().OneHot()
+	ret := []float64{
 		self.Stamina,
 		self.Effort,
 		self.Capacity,
@@ -25,6 +26,6 @@ func (p *Player) State() []float64 {
 		ball.Y,
 		ball.VelX,
 		ball.VelY,
-		// TODO: encode play_mode
 	}
+	return append(ret, playModeOneHot...)
 }
