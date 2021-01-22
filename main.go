@@ -39,7 +39,7 @@ func main() {
 				// time.Sleep(10 * time.Millisecond)
 			}
 
-			p.NaiveAction()
+			p.NaivePolicy()
 
 			if p.Client.PlayMode().String() == "time_over" {
 				p.Client.Bye()

@@ -7,8 +7,8 @@ import (
 	"github.com/rcssggb/ggb-lib/rcsscommon"
 )
 
-// RandomAction performs a random action
-func (p *Player) RandomAction() string {
+// RandomPolicy performs a random action
+func (p *Player) RandomPolicy() string {
 	var cmd string
 	action := rand.Intn(4)
 	powerParam := rand.Float64()*200 - 100
@@ -28,8 +28,8 @@ func (p *Player) RandomAction() string {
 	return cmd
 }
 
-// NaiveAction performs the naive behavior (run to ball and kick to goal)
-func (p *Player) NaiveAction() string {
+// NaivePolicy performs the naive behavior (run to ball and kick to goal)
+func (p *Player) NaivePolicy() string {
 	var cmd string
 
 	ball := p.GetBall()
