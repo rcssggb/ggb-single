@@ -1,22 +1,5 @@
 package player
 
-import "math/rand"
-
-// SampleDiscreteActionVector samples a random discrete action vector
-func (p *Player) SampleDiscreteActionVector() []float64 {
-	a := rand.Intn(16)
-	vec := make([]float64, 16)
-	vec[a] = 1
-	return vec
-}
-
-// DiscreteActionVector generates an action vector
-func (p *Player) DiscreteActionVector(a int) []float64 {
-	vec := make([]float64, 16)
-	vec[a] = 1
-	return vec
-}
-
 // DiscreteAction takes one os 16 pre-defined discrete actions
 func (p *Player) DiscreteAction(a int) {
 	switch a {
@@ -51,6 +34,6 @@ func (p *Player) DiscreteAction(a int) {
 	case 14:
 		p.Client.Kick(20, -45)
 	case 15:
-		// do nothing
+		p.Client.Move(-30, 0)
 	}
 }

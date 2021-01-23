@@ -34,24 +34,19 @@ func (p *Player) NaivePolicy() string {
 
 	ball := p.GetBall()
 	body := p.GetSelfData()
-	currentTime := p.Client.Time()
 
-	if currentTime == 0 || p.Client.PlayMode() == rcsscommon.PlayModeGoalL {
-		cmd += p.Client.Move(-30, 0)
+	if ball.NotSeenFor != 0 {
+		cmd += p.Client.Turn(20)
 	} else {
-		if ball.NotSeenFor != 0 {
-			cmd += p.Client.Turn(20)
+		ballDist := ball.Distance
+		if ballDist < 0.7 {
+			goalX, goalY := rcsscommon.FlagRightGoal.Position()
+			goalAngle := (180.0/math.Pi)*math.Atan2(goalY-body.Y, goalX-body.X) - body.T
+			cmd += p.Client.Kick(50, goalAngle)
 		} else {
-			ballDist := ball.Distance
-			if ballDist < 0.7 {
-				goalX, goalY := rcsscommon.FlagRightGoal.Position()
-				goalAngle := (180.0/math.Pi)*math.Atan2(goalY-body.Y, goalX-body.X) - body.T
-				cmd += p.Client.Kick(50, goalAngle)
-			} else {
-				ballAngle := ball.Direction + body.NeckAngle
-				cmd += p.Client.Dash(30, ballAngle)
-				cmd += p.Client.TurnNeck(ball.Direction / 2)
-			}
+			ballAngle := ball.Direction + body.NeckAngle
+			cmd += p.Client.Dash(30, ballAngle)
+			cmd += p.Client.TurnNeck(ball.Direction / 2)
 		}
 	}
 
