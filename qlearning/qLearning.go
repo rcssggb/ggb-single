@@ -32,8 +32,10 @@ func InitQLearning(stateSize, actionSize int) (*QLearning, error) {
 
 	qModel.AddLayers(
 		layer.FC{Input: inSize, Output: 64},
+		layer.FC{Input: 64, Output: 256},
 		layer.FC{Input: 256, Output: 64},
 		layer.FC{Input: 64, Output: 16},
+		layer.FC{Input: 16, Output: 4},
 		layer.FC{Input: 4, Output: 1, Activation: layer.Linear},
 	)
 
@@ -41,6 +43,7 @@ func InitQLearning(stateSize, actionSize int) (*QLearning, error) {
 	out := m.NewInput("actionValue", yShape)
 
 	fmt.Println("in shape: ", in.Shape())
+	fmt.Println("out shape: ", out.Shape())
 
 	err = qModel.Compile(in, out,
 		m.WithBatchSize(1),
