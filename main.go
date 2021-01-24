@@ -15,7 +15,7 @@ func main() {
 
 	hostName := "rcssserver"
 
-	qLearning, err := q.InitQLearning(51, 16)
+	qLearning, err := q.InitQLearning(71, 16)
 	if err != nil {
 		panic(err)
 	}
@@ -65,7 +65,7 @@ func main() {
 			}
 
 			if currentTime != 0 {
-				// time.Sleep(10 * time.Millisecond)
+				time.Sleep(10 * time.Millisecond)
 			}
 			t.DoneSynch()
 			p.WaitCycle()

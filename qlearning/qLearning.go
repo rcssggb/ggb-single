@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
-	"reflect"
 
 	"github.com/aunum/goro/pkg/v1/layer"
 	m "github.com/aunum/goro/pkg/v1/model"
@@ -25,21 +24,18 @@ func InitQLearning(stateSize, actionSize int) (*QLearning, error) {
 		return nil, err
 	}
 
-	inSize := stateSize + actionSize
-
-	xShape := []int{1, inSize}
-	yShape := []int{1, 1}
-
-	qModel.AddLayers(
-		layer.FC{Input: inSize, Output: 256},
-		layer.FC{Input: 256, Output: 64},
-		layer.FC{Input: 64, Output: 16},
-		layer.FC{Input: 16, Output: 4},
-		layer.FC{Input: 4, Output: 1, Activation: layer.Linear},
-	)
-
+	xShape := []int{1, stateSize}
+	yShape := []int{1, actionSize}
 	in := m.NewInput("state", xShape)
 	out := m.NewInput("actionValue", yShape)
+
+	qModel.AddLayers(
+		layer.FC{Input: in.Squeeze()[0], Output: 256},
+		layer.FC{Input: 256, Output: 128},
+		layer.FC{Input: 128, Output: 64},
+		layer.FC{Input: 64, Output: 32},
+		layer.FC{Input: 32, Output: out.Squeeze()[0], Activation: layer.Linear},
+	)
 
 	fmt.Println("in shape: ", in.Shape())
 	fmt.Println("out shape: ", out.Shape())
@@ -56,28 +52,30 @@ func InitQLearning(stateSize, actionSize int) (*QLearning, error) {
 
 // Slice2Tensor converts slice-formatted state into gorgonia tensor
 func Slice2Tensor(state []float64) *tensor.Dense {
-	return tensor.New(tensor.WithShape(1, len(state)), tensor.WithBacking(state))
-
+	f32state := make([]float32, len(state))
+	for i, v := range state {
+		f32state[i] = float32(v)
+	}
+	return tensor.New(tensor.WithShape(1, len(f32state)), tensor.WithBacking(f32state))
 }
 
-// GreedyAction TODO: we need to append each action vector to state vector before predicting
+// GreedyAction chooses greedy action and returns which action it is and its value
 func (q *QLearning) GreedyAction(state *tensor.Dense) (greedyA int, greedyValue float64, err error) {
+	var val gorgonia.Value
+	val, err = q.actionValue.Predict(state)
+	if err != nil {
+		return
+	}
+	valTensor, ok := val.Data().([][]float64)
+	if !ok {
+		err = fmt.Errorf("val.Data() is not as you thought it was")
+		return
+	}
+
 	greedyA = 0
 	greedyValue = -math.MaxFloat64
 	for a := 0; a < 16; a++ {
-		var val gorgonia.Value
-		val, err = q.actionValue.Predict(state)
-		if err != nil {
-			return
-		}
-
-		valNum, ok := val.Data().(float64)
-		fmt.Println(reflect.TypeOf(val.Data()), val.Data())
-		if !ok {
-			err = fmt.Errorf("val.Data() is not as you thought it was")
-			return
-		}
-
+		valNum := valTensor[0][a]
 		if valNum > greedyValue {
 			greedyValue = valNum
 			greedyA = a
