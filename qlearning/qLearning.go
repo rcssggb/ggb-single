@@ -70,6 +70,11 @@ func (q *QLearning) ActionValues(state *tensor.Dense) (actionValues *tensor.Dens
 	return
 }
 
+// Update updates learnables from state towards target
+func (q *QLearning) Update(state, target *tensor.Dense) error {
+	return q.actionValue.Fit(state, target)
+}
+
 // SampleDiscreteActionVector samples a random discrete action vector
 func SampleDiscreteActionVector() (int, []float64) {
 	a := rand.Intn(16)

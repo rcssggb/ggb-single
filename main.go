@@ -78,7 +78,7 @@ func main() {
 
 			// Observe R, S'
 			nextState := q.Slice2Tensor(p.State())
-			var r float64
+			var r float32
 			if p.Client.PlayMode() == rcsscommon.PlayModeGoalL {
 				r = 1
 				if r == 1 {
@@ -86,7 +86,21 @@ func main() {
 				}
 			}
 
-			// TODO: Update Q towards target
+			// Update Q towards target
+			nextActionValues, err := qLearning.ActionValues(state)
+			if err != nil {
+				p.Client.Log(err)
+			}
+			nextMax, err := nextActionValues.Max(1)
+			if err != nil {
+				p.Client.Log(err)
+			}
+			td := r + nextMax.Data().(float32)
+			actionValues.Set(maxAction, td)
+			err = qLearning.Update(state, actionValues)
+			if err != nil {
+				p.Client.Log(err)
+			}
 
 			// S <- S'
 			state = nextState
