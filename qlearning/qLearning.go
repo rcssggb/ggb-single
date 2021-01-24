@@ -2,7 +2,6 @@ package qlearning
 
 import (
 	"fmt"
-	"math"
 	"math/rand"
 
 	"github.com/aunum/goro/pkg/v1/layer"
@@ -59,28 +58,15 @@ func Slice2Tensor(state []float64) *tensor.Dense {
 	return tensor.New(tensor.WithShape(1, len(f32state)), tensor.WithBacking(f32state))
 }
 
-// GreedyAction chooses greedy action and returns which action it is and its value
-func (q *QLearning) GreedyAction(state *tensor.Dense) (greedyA int, greedyValue float64, err error) {
+// ActionValues returns action values for all possible actions
+func (q *QLearning) ActionValues(state *tensor.Dense) (actionValues *tensor.Dense, err error) {
 	var val gorgonia.Value
 	val, err = q.actionValue.Predict(state)
 	if err != nil {
 		return
 	}
-	valTensor, ok := val.Data().([][]float64)
-	if !ok {
-		err = fmt.Errorf("val.Data() is not as you thought it was")
-		return
-	}
+	actionValues = val.(*tensor.Dense)
 
-	greedyA = 0
-	greedyValue = -math.MaxFloat64
-	for a := 0; a < 16; a++ {
-		valNum := valTensor[0][a]
-		if valNum > greedyValue {
-			greedyValue = valNum
-			greedyA = a
-		}
-	}
 	return
 }
 

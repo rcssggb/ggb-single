@@ -49,14 +49,20 @@ func main() {
 
 			currentTime := p.Client.Time()
 
-			// TODO: Choose A from S using policy derived from Q (e.g., epsilon-greedy)
-			action, _, err := qLearning.GreedyAction(state)
+			// Choose A from S using policy derived from Q (e.g., epsilon-greedy)
+			// TODO: implement epsilon-greedy behavior instead of pure greedy
+			actionValues, err := qLearning.ActionValues(state)
 			if err != nil {
 				p.Client.Log(err)
 			}
 
 			// Take action A
-			p.DiscreteAction(action)
+			maxActionTensor, err := actionValues.Argmax(1)
+			if err != nil {
+				p.Client.Log(err)
+			}
+			maxAction := maxActionTensor.Data().(int)
+			p.DiscreteAction(maxAction)
 
 			err = p.Client.Error()
 			for err != nil {
