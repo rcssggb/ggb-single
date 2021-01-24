@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"math/rand"
 	"time"
 
 	"github.com/rcssggb/ggb-lib/rcsscommon"
@@ -11,6 +12,9 @@ import (
 )
 
 func main() {
+	epsilon := 1.0
+	const epsilonDecay = 0.9999
+
 	log.SetFlags(log.Lmicroseconds | log.Lshortfile)
 
 	hostName := "rcssserver"
@@ -50,19 +54,24 @@ func main() {
 			currentTime := p.Client.Time()
 
 			// Choose A from S using policy derived from Q (e.g., epsilon-greedy)
-			// TODO: implement epsilon-greedy behavior instead of pure greedy
-			actionValues, err := qLearning.ActionValues(state)
+			qValues, err := qLearning.ActionValues(state)
 			if err != nil {
 				p.Client.Log(err)
+			}
+			var action int
+			takeRandomAction := rand.Float64() < epsilon
+			if takeRandomAction {
+				action = rand.Intn(16)
+			} else {
+				maxActionTensor, err := qValues.Argmax(1)
+				if err != nil {
+					p.Client.Log(err)
+				}
+				action = maxActionTensor.Data().(int)
 			}
 
 			// Take action A
-			maxActionTensor, err := actionValues.Argmax(1)
-			if err != nil {
-				p.Client.Log(err)
-			}
-			maxAction := maxActionTensor.Data().(int)
-			p.DiscreteAction(maxAction)
+			p.Client.Log(p.DiscreteAction(action))
 
 			err = p.Client.Error()
 			for err != nil {
@@ -71,7 +80,7 @@ func main() {
 			}
 
 			if currentTime != 0 {
-				time.Sleep(10 * time.Millisecond)
+				// time.Sleep(100 * time.Millisecond)
 			}
 			t.DoneSynch()
 			p.WaitCycle()
@@ -84,6 +93,7 @@ func main() {
 				if r == 1 {
 					p.Client.Log("goal!")
 				}
+				epsilon = epsilon * epsilonDecay
 			}
 
 			// Update Q towards target
@@ -96,8 +106,8 @@ func main() {
 				p.Client.Log(err)
 			}
 			td := r + nextMax.Data().(float32)
-			actionValues.Set(maxAction, td)
-			err = qLearning.Update(state, actionValues)
+			qValues.Set(action, td)
+			err = qLearning.Update(state, qValues)
 			if err != nil {
 				p.Client.Log(err)
 			}
