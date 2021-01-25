@@ -12,8 +12,8 @@ import (
 )
 
 func main() {
-	epsilon := 1.0
-	const epsilonDecay = 0.9999
+	epsilon := 0.9
+	const epsilonDecay = 0.999
 
 	log.SetFlags(log.Lmicroseconds | log.Lshortfile)
 
@@ -45,6 +45,7 @@ func main() {
 		// Initialize S
 		state := q.Slice2Tensor(p.State())
 		t.Start()
+		lastGoalTime := -1
 		for {
 			if p.Client.PlayMode() == rcsscommon.PlayModeTimeOver {
 				p.Client.Log(p.Client.Bye())
@@ -71,7 +72,7 @@ func main() {
 			}
 
 			// Take action A
-			p.Client.Log(p.DiscreteAction(action))
+			p.DiscreteAction(action)
 
 			err = p.Client.Error()
 			for err != nil {
@@ -88,11 +89,10 @@ func main() {
 			// Observe R, S'
 			nextState := q.Slice2Tensor(p.State())
 			var r float32
-			if p.Client.PlayMode() == rcsscommon.PlayModeGoalL {
+			if p.Client.PlayMode() == rcsscommon.PlayModeGoalL && currentTime > lastGoalTime {
+				lastGoalTime = currentTime
 				r = 1
-				if r == 1 {
-					p.Client.Log("goal!")
-				}
+				p.Client.Log("goal!")
 				epsilon = epsilon * epsilonDecay
 			}
 
