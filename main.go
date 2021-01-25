@@ -14,6 +14,7 @@ import (
 func main() {
 	epsilon := 0.9
 	const epsilonDecay = 0.999
+	naiveGames := 100
 
 	log.SetFlags(log.Lmicroseconds | log.Lshortfile)
 
@@ -60,15 +61,20 @@ func main() {
 				p.Client.Log(err)
 			}
 			var action int
-			takeRandomAction := rand.Float64() < epsilon
-			if takeRandomAction {
-				action = rand.Intn(16)
+
+			if naiveGames > 0 {
+				action = p.NaivePolicy()
 			} else {
-				maxActionTensor, err := qValues.Argmax(1)
-				if err != nil {
-					p.Client.Log(err)
+				takeRandomAction := rand.Float64() < epsilon
+				if takeRandomAction {
+					action = rand.Intn(16)
+				} else {
+					maxActionTensor, err := qValues.Argmax(1)
+					if err != nil {
+						p.Client.Log(err)
+					}
+					action = maxActionTensor.Data().(int)
 				}
-				action = maxActionTensor.Data().(int)
 			}
 
 			// Take action A
@@ -115,5 +121,9 @@ func main() {
 			// S <- S'
 			state = nextState
 		}
+		if naiveGames > 0 {
+			naiveGames--
+		}
+		time.Sleep(5 * time.Second)
 	}
 }

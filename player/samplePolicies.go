@@ -29,26 +29,48 @@ func (p *Player) RandomPolicy() string {
 }
 
 // NaivePolicy performs the naive behavior (run to ball and kick to goal)
-func (p *Player) NaivePolicy() string {
-	var cmd string
+func (p *Player) NaivePolicy() int {
+	var action int
 
 	ball := p.GetBall()
 	body := p.GetSelfData()
 
 	if ball.NotSeenFor != 0 {
-		cmd += p.Client.Turn(20)
+		// p.Client.Turn(30)
+		action = 8
 	} else {
 		ballDist := ball.Distance
 		if ballDist < 0.7 {
 			goalX, goalY := rcsscommon.FlagRightGoal.Position()
 			goalAngle := (180.0/math.Pi)*math.Atan2(goalY-body.Y, goalX-body.X) - body.T
-			cmd += p.Client.Kick(50, goalAngle)
+			if -30 < goalAngle && goalAngle < 30 {
+				// p.Client.Kick(50, 0)
+				action = 4
+			} else if 30 < goalAngle && goalAngle < 90 {
+				// p.Client.Kick(50, 45)
+				action = 5
+			} else if -90 < goalAngle && goalAngle < -30 {
+				// p.Client.Kick(50, 45)
+				action = 6
+			} else {
+				// p.Client.Kick(-50, 0)
+				action = 7
+			}
 		} else {
 			ballAngle := ball.Direction + body.NeckAngle
-			cmd += p.Client.Dash(30, ballAngle)
-			cmd += p.Client.TurnNeck(ball.Direction / 2)
+			// p.Client.Dash(30, ballAngle)
+			if -15 < ballAngle && ballAngle < 15 {
+				// p.Client.Dash(50, 0)
+				action = 0
+			} else if ballAngle > 15 {
+				// p.Client.Turn(30)
+				action = 8
+			} else if ballAngle < -15 {
+				// p.Client.Turn(-30)
+				action = 9
+			}
 		}
 	}
 
-	return cmd
+	return action
 }
