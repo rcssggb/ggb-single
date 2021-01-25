@@ -1,7 +1,6 @@
 package qlearning
 
 import (
-	"fmt"
 	"math/rand"
 
 	"github.com/aunum/goro/pkg/v1/layer"
@@ -29,15 +28,12 @@ func InitQLearning(stateSize, actionSize int) (*QLearning, error) {
 	out := m.NewInput("actionValue", yShape)
 
 	qModel.AddLayers(
-		layer.FC{Input: in.Squeeze()[0], Output: 256},
-		layer.FC{Input: 256, Output: 128},
-		layer.FC{Input: 128, Output: 64},
-		layer.FC{Input: 64, Output: 32},
-		layer.FC{Input: 32, Output: out.Squeeze()[0], Activation: layer.Linear},
+		layer.FC{Input: in.Squeeze()[0], Output: 256, Init: gorgonia.Zeroes()},
+		layer.FC{Input: 256, Output: 128, Init: gorgonia.Zeroes()},
+		layer.FC{Input: 128, Output: 64, Init: gorgonia.Zeroes()},
+		layer.FC{Input: 64, Output: 32, Init: gorgonia.Zeroes()},
+		layer.FC{Input: 32, Output: out.Squeeze()[0], Activation: layer.Linear, Init: gorgonia.Zeroes()},
 	)
-
-	fmt.Println("in shape: ", in.Shape())
-	fmt.Println("out shape: ", out.Shape())
 
 	err = qModel.Compile(in, out,
 		m.WithBatchSize(1),
