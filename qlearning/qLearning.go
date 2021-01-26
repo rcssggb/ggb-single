@@ -107,3 +107,10 @@ func (q *QLearning) Save(filename string) error {
 	}
 	return nil
 }
+
+// TODO: load saved model and test if it was saved correctly
+
+// Load loads model
+func (q *QLearning) Load(filename string) error {
+	return nil
+}
