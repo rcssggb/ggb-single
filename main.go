@@ -30,6 +30,12 @@ func main() {
 		log.Println(err)
 	}
 
+	log.Println("Loading weights")
+	err = qLearning.Load("weights.rln")
+	if err != nil {
+		log.Println(err)
+	}
+
 	for {
 		p, err := player.NewPlayer("single-agent", hostName)
 		if err != nil {

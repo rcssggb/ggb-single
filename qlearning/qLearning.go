@@ -2,6 +2,7 @@ package qlearning
 
 import (
 	"encoding/gob"
+	"io"
 	"math/rand"
 	"os"
 
@@ -112,5 +113,31 @@ func (q *QLearning) Save(filename string) error {
 
 // Load loads model
 func (q *QLearning) Load(filename string) error {
+	f, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	dec := gob.NewDecoder(f)
+
+	i := 0
+	var nodes gorgonia.Nodes
+	for {
+		var node *gorgonia.Node
+		err = dec.Decode(&node)
+
+		// Reach end of file
+		if err != nil && err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
+
+		nodes = append(nodes, node)
+		i++
+	}
+
 	return nil
 }
