@@ -7,3 +7,5 @@ logs/*
 *.png
 
 .DS_Store
+
+*.rln

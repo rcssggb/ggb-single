@@ -25,6 +25,11 @@ func main() {
 		panic(err)
 	}
 
+	err = qLearning.Save("weights.rln")
+	if err != nil {
+		log.Println(err)
+	}
+
 	for {
 		p, err := player.NewPlayer("single-agent", hostName)
 		if err != nil {

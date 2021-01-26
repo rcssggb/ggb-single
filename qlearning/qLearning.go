@@ -1,7 +1,9 @@
 package qlearning
 
 import (
+	"encoding/gob"
 	"math/rand"
+	"os"
 
 	"github.com/aunum/goro/pkg/v1/layer"
 	m "github.com/aunum/goro/pkg/v1/model"
@@ -84,4 +86,24 @@ func DiscreteActionVector(a int) []float64 {
 	vec := make([]float64, 16)
 	vec[a] = 1
 	return vec
+}
+
+// Save saves model
+func (q *QLearning) Save(filename string) error {
+	nodes := q.actionValue.Learnables()
+
+	f, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+
+	defer f.Close()
+	enc := gob.NewEncoder(f)
+	for _, node := range nodes {
+		err := enc.Encode(node.Value())
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
