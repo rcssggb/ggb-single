@@ -2,6 +2,7 @@ package qlearning
 
 import (
 	"encoding/gob"
+	"fmt"
 	"io"
 	"math/rand"
 	"os"
@@ -17,9 +18,9 @@ type QLearning struct {
 	actionValue *m.Sequential
 }
 
-// InitQLearning instantiates models for actor-critic learning of
+// Init instantiates models for q-learning of
 // a discrete policy
-func InitQLearning(stateSize, actionSize int) (*QLearning, error) {
+func Init(stateSize, actionSize int) (*QLearning, error) {
 	qModel, err := m.NewSequential("qLearning")
 	if err != nil {
 		return nil, err
@@ -91,6 +92,7 @@ func DiscreteActionVector(a int) []float64 {
 
 // Save saves model
 func (q *QLearning) Save(filename string) error {
+	fmt.Println("save")
 	nodes := q.actionValue.Learnables()
 
 	f, err := os.Create(filename)
@@ -101,6 +103,7 @@ func (q *QLearning) Save(filename string) error {
 	defer f.Close()
 	enc := gob.NewEncoder(f)
 	for _, node := range nodes {
+		fmt.Println(node.Value())
 		err := enc.Encode(node.Value())
 		if err != nil {
 			return err
@@ -109,35 +112,42 @@ func (q *QLearning) Save(filename string) error {
 	return nil
 }
 
-// TODO: load saved model and test if it was saved correctly
-
 // Load loads model
-func (q *QLearning) Load(filename string) error {
+// TODO: load saved model and test if it was saved correctly
+func Load(filename string) (*QLearning, error) {
+	fmt.Println("load")
 	f, err := os.Open(filename)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer f.Close()
 
 	dec := gob.NewDecoder(f)
 
 	i := 0
-	// var nodes gorgonia.Nodes
+	var nodes gorgonia.Nodes
 	for {
 		var t *tensor.Dense
 		err = dec.Decode(&t)
+		fmt.Println(t)
 
 		// Reach end of file
 		if err != nil && err == io.EOF {
 			break
 		}
 		if err != nil {
-			return err
+			return nil, err
+		}
+		if t == nil {
+			fmt.Println("nil t")
+			continue
 		}
 
-		// nodes = append(nodes, node)
+		node := new(gorgonia.Node)
+		err = gorgonia.Let(node, t)
+		nodes = append(nodes, node)
 		i++
 	}
 
-	return nil
+	return nil, nil
 }

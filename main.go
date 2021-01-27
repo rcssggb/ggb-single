@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"math/rand"
+	"os"
 	"time"
 
 	"github.com/rcssggb/ggb-lib/rcsscommon"
@@ -20,7 +21,7 @@ func main() {
 
 	hostName := "rcssserver"
 
-	qLearning, err := q.InitQLearning(71, 16)
+	qLearning, err := q.Init(71, 16)
 	if err != nil {
 		panic(err)
 	}
@@ -30,11 +31,12 @@ func main() {
 		log.Println(err)
 	}
 
-	log.Println("Loading weights")
-	err = qLearning.Load("weights.rln")
+	qLearning, err = q.Load("weights.rln")
 	if err != nil {
 		log.Println(err)
 	}
+
+	os.Exit(0)
 
 	for {
 		p, err := player.NewPlayer("single-agent", hostName)
