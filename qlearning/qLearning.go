@@ -125,11 +125,14 @@ func Load(filename string) (*QLearning, error) {
 	dec := gob.NewDecoder(f)
 
 	i := 0
-	var nodes gorgonia.Nodes
+	q, err := Init(71, 16)
+	if err != nil {
+		panic(err)
+	}
+	learnables := q.actionValue.Learnables()
 	for {
 		var t *tensor.Dense
 		err = dec.Decode(&t)
-		fmt.Println(t)
 
 		// Reach end of file
 		if err != nil && err == io.EOF {
@@ -143,11 +146,9 @@ func Load(filename string) (*QLearning, error) {
 			continue
 		}
 
-		node := new(gorgonia.Node)
-		err = gorgonia.Let(node, t)
-		nodes = append(nodes, node)
+		err = gorgonia.Let(learnables[i], t)
 		i++
 	}
 
-	return nil, nil
+	return q, nil
 }
