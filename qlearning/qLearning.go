@@ -20,23 +20,23 @@ type QLearning struct {
 
 // Init instantiates models for q-learning of
 // a discrete policy
-func Init(stateSize, actionSize int) (*QLearning, error) {
+func Init() (*QLearning, error) {
 	qModel, err := m.NewSequential("qLearning")
 	if err != nil {
 		return nil, err
 	}
 
-	xShape := []int{1, stateSize}
-	yShape := []int{1, actionSize}
+	xShape := []int{1, 71}
+	yShape := []int{1, 16}
 	in := m.NewInput("state", xShape)
 	out := m.NewInput("actionValue", yShape)
 
 	qModel.AddLayers(
-		layer.FC{Input: in.Squeeze()[0], Output: 256, Init: gorgonia.Zeroes()},
-		layer.FC{Input: 256, Output: 128, Init: gorgonia.Zeroes()},
-		layer.FC{Input: 128, Output: 64, Init: gorgonia.Zeroes()},
-		layer.FC{Input: 64, Output: 32, Init: gorgonia.Zeroes()},
-		layer.FC{Input: 32, Output: out.Squeeze()[0], Activation: layer.Linear, Init: gorgonia.Zeroes()},
+		layer.FC{Input: in.Squeeze()[0], Output: 256},
+		layer.FC{Input: 256, Output: 128},
+		layer.FC{Input: 128, Output: 64},
+		layer.FC{Input: 64, Output: 32},
+		layer.FC{Input: 32, Output: out.Squeeze()[0], Activation: layer.Linear},
 	)
 
 	err = qModel.Compile(in, out,
@@ -92,7 +92,6 @@ func DiscreteActionVector(a int) []float64 {
 
 // Save saves model
 func (q *QLearning) Save(filename string) error {
-	fmt.Println("save")
 	nodes := q.actionValue.Learnables()
 
 	f, err := os.Create(filename)
@@ -103,7 +102,6 @@ func (q *QLearning) Save(filename string) error {
 	defer f.Close()
 	enc := gob.NewEncoder(f)
 	for _, node := range nodes {
-		fmt.Println(node.Value())
 		err := enc.Encode(node.Value())
 		if err != nil {
 			return err
@@ -115,7 +113,6 @@ func (q *QLearning) Save(filename string) error {
 // Load loads model
 // TODO: load saved model and test if it was saved correctly
 func Load(filename string) (*QLearning, error) {
-	fmt.Println("load")
 	f, err := os.Open(filename)
 	if err != nil {
 		return nil, err
@@ -125,7 +122,7 @@ func Load(filename string) (*QLearning, error) {
 	dec := gob.NewDecoder(f)
 
 	i := 0
-	q, err := Init(71, 16)
+	q, err := Init()
 	if err != nil {
 		panic(err)
 	}

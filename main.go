@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"math/rand"
 	"os"
@@ -21,20 +22,34 @@ func main() {
 
 	hostName := "rcssserver"
 
-	qLearning, err := q.Init(71, 16)
+	qLearning, err := q.Init()
 	if err != nil {
 		panic(err)
 	}
 
-	err = qLearning.Save("weights.rln")
+	qLearningA := qLearning
+
+	err = qLearningA.Save("weights.rln")
 	if err != nil {
 		log.Println(err)
 	}
 
-	qLearning, err = q.Load("weights.rln")
+	qLearningB, err := q.Load("weights.rln")
 	if err != nil {
 		log.Println(err)
 	}
+
+	fakeState := make([]float64, 71)
+	for i := range fakeState {
+		fakeState[i] = 1.0
+	}
+	stateTensor := q.Slice2Tensor(fakeState)
+
+	avA, _ := qLearningA.ActionValues(stateTensor)
+	avB, _ := qLearningB.ActionValues(stateTensor)
+
+	fmt.Println(avA)
+	fmt.Println(avB)
 
 	os.Exit(0)
 
