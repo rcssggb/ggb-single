@@ -1,10 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"math/rand"
-	"os"
 	"time"
 
 	"github.com/rcssggb/ggb-lib/rcsscommon"
@@ -34,24 +32,10 @@ func main() {
 		log.Println(err)
 	}
 
-	qLearningB, err := q.Load("weights.rln")
+	_, err = q.Load("weights.rln")
 	if err != nil {
 		log.Println(err)
 	}
-
-	fakeState := make([]float64, 71)
-	for i := range fakeState {
-		fakeState[i] = 1.0
-	}
-	stateTensor := q.Slice2Tensor(fakeState)
-
-	avA, _ := qLearningA.ActionValues(stateTensor)
-	avB, _ := qLearningB.ActionValues(stateTensor)
-
-	fmt.Println(avA)
-	fmt.Println(avB)
-
-	os.Exit(0)
 
 	for {
 		p, err := player.NewPlayer("single-agent", hostName)

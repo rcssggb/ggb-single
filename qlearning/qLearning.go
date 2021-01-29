@@ -32,11 +32,11 @@ func Init() (*QLearning, error) {
 	out := m.NewInput("actionValue", yShape)
 
 	qModel.AddLayers(
-		layer.FC{Input: in.Squeeze()[0], Output: 256},
-		layer.FC{Input: 256, Output: 128},
-		layer.FC{Input: 128, Output: 64},
-		layer.FC{Input: 64, Output: 32},
-		layer.FC{Input: 32, Output: out.Squeeze()[0], Activation: layer.Linear},
+		layer.FC{Input: in.Squeeze()[0], Output: 256, Init: gorgonia.Zeroes()},
+		layer.FC{Input: 256, Output: 128, Init: gorgonia.Zeroes()},
+		layer.FC{Input: 128, Output: 64, Init: gorgonia.Zeroes()},
+		layer.FC{Input: 64, Output: 32, Init: gorgonia.Zeroes()},
+		layer.FC{Input: 32, Output: out.Squeeze()[0], Activation: layer.Linear, Init: gorgonia.Zeroes()},
 	)
 
 	err = qModel.Compile(in, out,
@@ -126,6 +126,7 @@ func Load(filename string) (*QLearning, error) {
 	if err != nil {
 		panic(err)
 	}
+
 	learnables := q.actionValue.Learnables()
 	for {
 		var t *tensor.Dense
@@ -143,9 +144,18 @@ func Load(filename string) (*QLearning, error) {
 			continue
 		}
 
-		err = gorgonia.Let(learnables[i], t)
+		learnable := learnables[i]
+		err = gorgonia.Let(learnable, t)
+
 		i++
 	}
 
+	q.actionValue.SetLearnables(learnables)
+
 	return q, nil
+}
+
+// Learnables returns learnables
+func (q *QLearning) Learnables() gorgonia.Nodes {
+	return q.actionValue.Learnables()
 }
