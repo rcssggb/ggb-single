@@ -1,8 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"math"
 	"math/rand"
+	"os"
 	"time"
 
 	"github.com/rcssggb/ggb-lib/rcsscommon"
@@ -12,29 +15,29 @@ import (
 )
 
 func main() {
-	epsilon := 0.9
+	epsilon := 0.7
 	const epsilonDecay = 0.999
 	naiveGames := 100
+	gameCounter := 0
+	weightsFile := "weights.rln"
 
 	log.SetFlags(log.Lmicroseconds | log.Lshortfile)
 
 	hostName := "rcssserver"
 
-	qLearning, err := q.Init()
-	if err != nil {
-		panic(err)
-	}
+	var qLearning *q.QLearning
+	var err error
 
-	qLearningA := qLearning
-
-	err = qLearningA.Save("weights.rln")
-	if err != nil {
-		log.Println(err)
-	}
-
-	_, err = q.Load("weights.rln")
-	if err != nil {
-		log.Println(err)
+	_, err = os.Stat(weightsFile)
+	if os.IsNotExist(err) {
+		log.Println("creating new agent")
+		qLearning, err = q.Init()
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		log.Printf("loading agent from %s\n", weightsFile)
+		qLearning, err = q.Load(weightsFile)
 	}
 
 	for {
@@ -74,12 +77,12 @@ func main() {
 			}
 			var action int
 
-			if naiveGames > 0 {
-				action = p.NaivePolicy()
+			takeRandomAction := rand.Float64() < epsilon
+			if takeRandomAction {
+				action = rand.Intn(16)
 			} else {
-				takeRandomAction := rand.Float64() < epsilon
-				if takeRandomAction {
-					action = rand.Intn(16)
+				if naiveGames > 0 {
+					action = p.NaivePolicy()
 				} else {
 					maxActionTensor, err := qValues.Argmax(1)
 					if err != nil {
@@ -123,7 +126,11 @@ func main() {
 			if err != nil {
 				p.Client.Log(err)
 			}
-			td := r + nextMax.Data().(float32)
+			nextMaxVal := nextMax.Data().([]float32)[0]
+			if math.IsNaN(float64(nextMaxVal)) {
+				panic("training diverged")
+			}
+			td := r + nextMaxVal
 			qValues.Set(action, td)
 			err = qLearning.Update(state, qValues)
 			if err != nil {
@@ -135,6 +142,14 @@ func main() {
 		}
 		if naiveGames > 0 {
 			naiveGames--
+		}
+		gameCounter++
+		log.Printf("finished game number %d\n", gameCounter)
+		if gameCounter%10 == 0 {
+			err = qLearning.Save(weightsFile)
+			if err != nil {
+				fmt.Printf("weights saved after %d games\n", gameCounter)
+			}
 		}
 		time.Sleep(5 * time.Second)
 	}

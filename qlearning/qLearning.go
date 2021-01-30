@@ -111,7 +111,6 @@ func (q *QLearning) Save(filename string) error {
 }
 
 // Load loads model
-// TODO: load saved model and test if it was saved correctly
 func Load(filename string) (*QLearning, error) {
 	f, err := os.Open(filename)
 	if err != nil {
