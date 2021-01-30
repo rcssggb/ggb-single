@@ -62,13 +62,12 @@ func main() {
 		state := q.Slice2Tensor(p.State())
 		t.Start()
 		lastGoalTime := -1
+		currentTime := 0
 		for {
 			if p.Client.PlayMode() == rcsscommon.PlayModeTimeOver {
 				p.Client.Log(p.Client.Bye())
 				break
 			}
-
-			currentTime := p.Client.Time()
 
 			// Choose A from S using policy derived from Q (e.g., epsilon-greedy)
 			qValues, err := qLearning.ActionValues(state)
@@ -76,8 +75,6 @@ func main() {
 				p.Client.Log(err)
 			}
 			var action int
-
-			log.Println(qValues)
 
 			takeRandomAction := rand.Float64() < epsilon
 			if takeRandomAction {
@@ -111,6 +108,7 @@ func main() {
 
 			// Observe R, S'
 			nextState := q.Slice2Tensor(p.State())
+			currentTime = p.Client.Time()
 			var r float32
 			if p.Client.PlayMode() == rcsscommon.PlayModeGoalL && currentTime > lastGoalTime {
 				lastGoalTime = currentTime
