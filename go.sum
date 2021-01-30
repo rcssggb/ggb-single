@@ -20,6 +20,8 @@ github.com/aunum/gold v0.0.0-20200329164505-1b7f92d6b247 h1:GQFCDFcYllQfzo00IQci
 github.com/aunum/gold v0.0.0-20200329164505-1b7f92d6b247/go.mod h1:x6nHhYZZC3x7+ciHstSIdOn779OOQKzqI0ERgwcQebY=
 github.com/aunum/goro v0.0.0-20200405193922-6843b7790935 h1:t762qpNXOWnBzFPZRjnYm7UaAC98qp23plAjyiOAJgY=
 github.com/aunum/goro v0.0.0-20200405193922-6843b7790935/go.mod h1:+zkQtcdeh4h89LBxutgM3F46vzQBBC4aQHKbr/ttA2s=
+github.com/aunum/goro v0.0.0-20210130030158-f83957ed3c81 h1:I0oqVoApZnWHjnFY7oqFy7ThrkQ12rU458h3gCmF5bA=
+github.com/aunum/goro v0.0.0-20210130030158-f83957ed3c81/go.mod h1:+zkQtcdeh4h89LBxutgM3F46vzQBBC4aQHKbr/ttA2s=
 github.com/aunum/log v0.0.0-20200321163253-24c356e939b0 h1:pLO0OS2sfb+XfZKCPjJeqDYWPngbK786h40oAKDqgpU=
 github.com/aunum/log v0.0.0-20200321163253-24c356e939b0/go.mod h1:ze/JIQHfGKwpM8U2b39e8OH0KHt1ovEcjwPV3yfU+/c=
 github.com/aunum/sphere v0.0.0-20200323032354-adb109813e4c/go.mod h1:J/B7bBwrMlajgFvbe+tkyY0FVTJeEYujMGfhIrcmBB4=
