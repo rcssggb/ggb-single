@@ -15,9 +15,9 @@ import (
 )
 
 func main() {
-	epsilon := 0.7
+	epsilon := 0.0
 	const epsilonDecay = 0.999
-	naiveGames := 100
+	naiveGames := 0
 	gameCounter := 0
 	weightsFile := "weights.rln"
 
@@ -77,6 +77,8 @@ func main() {
 			}
 			var action int
 
+			log.Println(qValues)
+
 			takeRandomAction := rand.Float64() < epsilon
 			if takeRandomAction {
 				action = rand.Intn(16)
@@ -88,7 +90,7 @@ func main() {
 					if err != nil {
 						p.Client.Log(err)
 					}
-					action = maxActionTensor.Data().(int)
+					action = maxActionTensor.Data().([]int)[0]
 				}
 			}
 
