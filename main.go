@@ -40,6 +40,7 @@ func main() {
 		qLearning, err = q.Load(weightsFile)
 	}
 
+	trainingStart := time.Now()
 	for {
 		p, err := player.NewPlayer("single-agent", hostName)
 		if err != nil {
@@ -63,6 +64,7 @@ func main() {
 		t.Start()
 		lastGoalTime := -1
 		currentTime := 0
+		returnValue := float32(0)
 		for {
 			if p.Client.PlayMode() == rcsscommon.PlayModeTimeOver {
 				p.Client.Log(p.Client.Bye())
@@ -116,6 +118,7 @@ func main() {
 				p.Client.Log("goal!")
 				epsilon = epsilon * epsilonDecay
 			}
+			returnValue += r
 
 			// Update Q towards target
 			nextActionValues, err := qLearning.ActionValues(state)
@@ -144,7 +147,8 @@ func main() {
 			naiveGames--
 		}
 		gameCounter++
-		log.Printf("finished game number %d\n", gameCounter)
+		timeSinceStart := time.Now().Sub(trainingStart)
+		log.Printf("finished game number %d with return %f after training for %s with an average of %.1f seconds per game\n", gameCounter, returnValue, timeSinceStart, timeSinceStart.Seconds()/float64(gameCounter))
 		if gameCounter%10 == 0 {
 			err = qLearning.Save(weightsFile)
 			if err != nil {
