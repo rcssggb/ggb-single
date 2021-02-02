@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"math"
 	"math/rand"
@@ -152,8 +151,9 @@ func main() {
 		if gameCounter%10 == 0 {
 			err = qLearning.Save(weightsFile)
 			if err != nil {
-				fmt.Printf("weights saved after %d games\n", gameCounter)
+				log.Println(err)
 			}
+			log.Printf("weights saved after %d games\n", gameCounter)
 		}
 		time.Sleep(5 * time.Second)
 	}

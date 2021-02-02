@@ -147,6 +147,8 @@ github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZN
 github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4/go.mod h1:xMI15A0UPsDsEKsMN9yxemIoYk6Tm2C1GtYGdfGttqA=
 github.com/rcssggb/ggb-lib v0.2.9 h1:mSaPuuni1oAKv2VVya4VW3pBuqzvxRfBDl8fqJuWHOw=
 github.com/rcssggb/ggb-lib v0.2.9/go.mod h1:1y6mRGu1vq7juNyTQWMWOHf3HXFJht8/jtQBSbpUk3E=
+github.com/rcssggb/ggb-lib v0.2.10 h1:5ik5ojjQ1HYQDL0IJ6bjPJ6hL0G0QbJQ89B/KMRgpWk=
+github.com/rcssggb/ggb-lib v0.2.10/go.mod h1:1y6mRGu1vq7juNyTQWMWOHf3HXFJht8/jtQBSbpUk3E=
 github.com/remyoudompheng/bigfft v0.0.0-20190728182440-6a916e37a237/go.mod h1:qqbHyh8v60DhA7CoWK5oRCqLrMHRGoxYCSS9EjAz6Eo=
 github.com/rogpeppe/fastuuid v1.2.0/go.mod h1:jVj6XXZzXRy/MSR5jhDC/2q6DgLz+nrA6LYCDYWNEvQ=
 github.com/sirupsen/logrus v1.0.4-0.20170822132746-89742aefa4b2/go.mod h1:pMByvHTf9Beacp5x1UXfOR9xyW/9antXMhjMPG0dEzc=
