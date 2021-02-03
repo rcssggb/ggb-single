@@ -16,6 +16,7 @@ import (
 
 func main() {
 	epsilon := 0.1
+	const alpha = float32(0.2)
 	const epsilonDecay = 0.9999
 	naiveGames := 0
 	gameCounter := 0
@@ -74,6 +75,11 @@ func main() {
 
 		// Initialize S
 		state := q.Slice2Tensor(p.State())
+		startX, startY := rcsscommon.RandomPosition()
+		if startX > 0 {
+			startX = -startX
+		}
+		t.MovePlayer("single-agent", 1, startX, startY, 0, 0, 0)
 		t.Start()
 		// lastGoalTime := -1
 		currentTime := 0
@@ -178,8 +184,10 @@ func main() {
 					panic("training diverged")
 				}
 				td := r + nextMaxVal
-				qValuesA.Set(action, td)
-				err = qLearningA.Update(state, qValues)
+				currentQ := qValuesA.Get(action)
+				currentQVal := currentQ.(float32)
+				qValuesA.Set(action, currentQVal+alpha*(td-currentQVal))
+				err = qLearningA.Update(state, qValuesA)
 				if err != nil {
 					p.Client.Log(err)
 				}
@@ -198,8 +206,10 @@ func main() {
 					panic("training diverged")
 				}
 				td := r + nextMaxVal
-				qValuesB.Set(action, td)
-				err = qLearningB.Update(state, qValues)
+				currentQ := qValuesA.Get(action)
+				currentQVal := currentQ.(float32)
+				qValuesB.Set(action, currentQVal+alpha*(td-currentQVal))
+				err = qLearningB.Update(state, qValuesB)
 				if err != nil {
 					p.Client.Log(err)
 				}
