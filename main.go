@@ -206,7 +206,7 @@ func main() {
 					panic("training diverged")
 				}
 				td := r + nextMaxVal
-				currentQ := qValuesA.Get(action)
+				currentQ := qValuesB.Get(action)
 				currentQVal := currentQ.(float32)
 				qValuesB.Set(action, currentQVal+alpha*(td-currentQVal))
 				err = qLearningB.Update(state, qValuesB)
