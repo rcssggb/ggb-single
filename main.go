@@ -100,12 +100,14 @@ func main() {
 				p.Client.Log(err)
 			}
 
-			// TODO: this below should be (A+B)/2 but i couldn't make it work so I did 50/50 chance instead
 			var qValues *tensor.Dense
-			if rand.Float32() < 0.5 {
-				qValues = qValuesA
-			} else {
-				qValues = qValuesB
+			qSum, err := qValuesA.Add(qValuesB)
+			if err != nil {
+				p.Client.Log(err)
+			}
+			qValues, err = qSum.DivScalar(float32(2.0), true)
+			if err != nil {
+				p.Client.Log(err)
 			}
 
 			var action int
