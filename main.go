@@ -70,6 +70,8 @@ func main() {
 
 		t.EarOn()
 		t.EyeOn()
+		p.Client.SynchSee()
+		p.Client.ChangeView(rcsscommon.ViewWidthNarrow, rcsscommon.ViewQualityHigh)
 
 		time.Sleep(2 * time.Second)
 
