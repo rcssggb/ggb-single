@@ -191,7 +191,7 @@ func main() {
 				currentQ := qValuesA.Get(action)
 				currentQVal := currentQ.(float32)
 				qValuesA.Set(action, currentQVal+alpha*(td-currentQVal))
-				err = qLearningA.Update(state, qValuesA)
+				err = qLearningA.UpdateWithBatch(state, qValuesA)
 				if err != nil {
 					p.Client.Log(err)
 				}
@@ -213,7 +213,7 @@ func main() {
 				currentQ := qValuesB.Get(action)
 				currentQVal := currentQ.(float32)
 				qValuesB.Set(action, currentQVal+alpha*(td-currentQVal))
-				err = qLearningB.Update(state, qValuesB)
+				err = qLearningB.UpdateWithBatch(state, qValuesB)
 				if err != nil {
 					p.Client.Log(err)
 				}
