@@ -11,7 +11,7 @@ func (p *Player) State() []float64 {
 	ret := []float64{
 		self.Stamina / serverParams.StaminaMax,
 		self.Effort,
-		self.Capacity,
+		self.Capacity / serverParams.StaminaCapacity,
 		self.X / rcsscommon.FieldMaxX,
 		self.Y / rcsscommon.FieldMaxY,
 		self.T / 180.0,
