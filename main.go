@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/gob"
 	"log"
 	"math"
 	"math/rand"
@@ -30,6 +31,12 @@ func main() {
 		log.Fatal(err)
 	}
 	defer file.Close()
+
+	returnsFile, err := os.Create("returns.rln")
+	if err != nil {
+		log.Println(err)
+	}
+	defer returnsFile.Close()
 
 	log.SetOutput(file)
 	log.SetFlags(log.Lmicroseconds | log.Lshortfile)
@@ -238,6 +245,14 @@ func main() {
 		gameCounter++
 		timeSinceStart := time.Now().Sub(trainingStart)
 		log.Printf("finished game number %d with return %f after training for %s with an average of %.1f seconds per game\n", gameCounter, returnValue, timeSinceStart, timeSinceStart.Seconds()/float64(gameCounter))
+
+		// Write return at the end of episode
+		enc := gob.NewEncoder(returnsFile)
+		err = enc.Encode(returnValue)
+		if err != nil {
+			log.Println(err)
+		}
+
 		if gameCounter%10 == 0 {
 			err = qLearningA.Save(weightsFileA)
 			if err != nil {
