@@ -5,6 +5,7 @@ import (
 	"math"
 	"math/rand"
 	"os"
+	"path"
 	"time"
 
 	"github.com/rcssggb/ggb-lib/rcsscommon"
@@ -23,12 +24,20 @@ func main() {
 	weightsFileA := "weightsA.rln"
 	weightsFileB := "weightsB.rln"
 
+	logName := time.Now().String() + ".log"
+	file, err := os.OpenFile(path.Join("logs", logName), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.SetOutput(file)
 	log.SetFlags(log.Lmicroseconds | log.Lshortfile)
+
+	log.Printf("starting training with // epsilon = %f // alpha = %f // epsilonDecay = %f // naiveGames = %d", epsilon, alpha, epsilonDecay, naiveGames)
 
 	hostName := "rcssserver"
 
 	var qLearningA, qLearningB *q.QLearning
-	var err error
 
 	_, err = os.Stat(weightsFileA)
 	if os.IsNotExist(err) {
