@@ -24,6 +24,7 @@ func main() {
 	gameCounter := 0
 	weightsFileA := "weightsA.rln"
 	weightsFileB := "weightsB.rln"
+	returnsFile := "./data/returns.rln"
 
 	logName := time.Now().String() + ".log"
 	file, err := os.OpenFile(path.Join("logs", logName), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
@@ -31,12 +32,6 @@ func main() {
 		log.Fatal(err)
 	}
 	defer file.Close()
-
-	returnsFile, err := os.Create("returns.rln")
-	if err != nil {
-		log.Println(err)
-	}
-	defer returnsFile.Close()
 
 	log.SetOutput(file)
 	log.SetFlags(log.Lmicroseconds | log.Lshortfile)
@@ -71,6 +66,7 @@ func main() {
 		qLearningB, err = q.Load(weightsFileB)
 	}
 
+	returnValues := []float32{}
 	trainingStart := time.Now()
 	for {
 		p, err := player.NewPlayer("single-agent", hostName)
@@ -247,11 +243,7 @@ func main() {
 		log.Printf("finished game number %d with return %f after training for %s with an average of %.1f seconds per game\n", gameCounter, returnValue, timeSinceStart, timeSinceStart.Seconds()/float64(gameCounter))
 
 		// Write return at the end of episode
-		enc := gob.NewEncoder(returnsFile)
-		err = enc.Encode(returnValue)
-		if err != nil {
-			log.Println(err)
-		}
+		returnValues = append(returnValues, returnValue)
 
 		if gameCounter%10 == 0 {
 			err = qLearningA.Save(weightsFileA)
@@ -263,6 +255,21 @@ func main() {
 				log.Println(err)
 			}
 			log.Printf("weights saved after %d games\n", gameCounter)
+			if gameCounter%50 == 0 {
+				file, err := os.Create(returnsFile)
+				if err != nil {
+					log.Println(err)
+				}
+
+				enc := gob.NewEncoder(file)
+				err = enc.Encode(returnValues)
+				if err != nil {
+					log.Println(err)
+				}
+
+				file.Close()
+				log.Printf("return history saved after %d games\n", gameCounter)
+			}
 		}
 		time.Sleep(5 * time.Second)
 	}
