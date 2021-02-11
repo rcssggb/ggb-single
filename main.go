@@ -200,7 +200,10 @@ func main() {
 				if math.IsNaN(float64(nextMaxVal)) {
 					panic("training diverged")
 				}
-				td := r + nextMaxVal
+				td := r
+				if p.Client.PlayMode() != rcsscommon.PlayModeTimeOver {
+					td += nextMaxVal
+				}
 				currentQ := qValuesA.Get(action)
 				currentQVal := currentQ.(float32)
 				qValuesA.Set(action, currentQVal+alpha*(td-currentQVal))
@@ -222,7 +225,10 @@ func main() {
 				if math.IsNaN(float64(nextMaxVal)) {
 					panic("training diverged")
 				}
-				td := r + nextMaxVal
+				td := r
+				if p.Client.PlayMode() != rcsscommon.PlayModeTimeOver {
+					td += nextMaxVal
+				}
 				currentQ := qValuesB.Get(action)
 				currentQVal := currentQ.(float32)
 				qValuesB.Set(action, currentQVal+alpha*(td-currentQVal))
@@ -240,7 +246,7 @@ func main() {
 		}
 		gameCounter++
 		timeSinceStart := time.Now().Sub(trainingStart)
-		log.Printf("finished game number %d with return %f after training for %s with an average of %.1f seconds per game\n", gameCounter, returnValue, timeSinceStart, timeSinceStart.Seconds()/float64(gameCounter))
+		log.Printf("game: %d | return: %f | total time: %s | time/game: %.1f\n", gameCounter, returnValue, timeSinceStart, timeSinceStart.Seconds()/float64(gameCounter))
 
 		// Write return at the end of episode
 		returnValues = append(returnValues, returnValue)
