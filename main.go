@@ -160,22 +160,27 @@ func main() {
 			nextState := q.Slice2Tensor(p.State())
 			currentTime = p.Client.Time()
 			r := float32(0)
-			ball := p.GetBall()
-			if ball.NotSeenFor == 0 {
-				ballDist := float32(ball.Distance)
-				if ballDist < 0.7 {
-					ballDist = 0.7
-					epsilon *= epsilonDecay
-				}
-				r = 1.0 / ballDist
-			}
-			returnValue += r
+
+			r = float32(math.Abs(t.GlobalPositions().Teams["single-agent"][1].BodyAngle) / 180.0)
+
+			// ball := p.GetBall()
+			// if ball.NotSeenFor == 0 {
+			// 	ballDist := float32(ball.Distance)
+			// 	if ballDist < 0.7 {
+			// 		ballDist = 0.7
+			// 		epsilon *= epsilonDecay
+			// 	}
+			// 	r = 1.0 / ballDist
+			// }
+
 			// if p.Client.PlayMode() == rcsscommon.PlayModeGoalL && currentTime > lastGoalTime {
 			// 	lastGoalTime = currentTime
 			// 	r = 1
 			// 	p.Client.Log("goal!")
 			// 	epsilon = epsilon * epsilonDecay
 			// }
+
+			returnValue += r
 
 			// Update Q towards target
 			nextActionValuesA, err := qLearningA.ActionValues(state)
@@ -277,6 +282,6 @@ func main() {
 				log.Printf("return history saved after %d games\n", gameCounter)
 			}
 		}
-		time.Sleep(5 * time.Second)
+		time.Sleep(2 * time.Second)
 	}
 }
