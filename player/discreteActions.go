@@ -1,6 +1,6 @@
 package player
 
-// DiscreteAction takes one os 16 pre-defined discrete actions
+// DiscreteAction takes one of 16 pre-defined discrete actions
 func (p *Player) DiscreteAction(a int) string {
 	switch a {
 	case 0:
