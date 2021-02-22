@@ -102,6 +102,11 @@ func main() {
 				break
 			}
 
+			if (currentTime % 400) == 0 {
+				x, y := rcsscommon.RandomPosition()
+				t.MoveBall(x, y, 0, 0)
+			}
+
 			// Choose A from S using policy derived from Q (e.g., epsilon-greedy)
 			// qValuesA, err := qLearningA.ActionValues(state)
 			// if err != nil {
@@ -139,6 +144,12 @@ func main() {
 			// }
 
 			action := 0
+			if p.GetBall().NotSeenFor == 0 {
+				action = 1
+			} else {
+				fmt.Println("ball not seen for ", p.GetBall().NotSeenFor)
+				action = 0
+			}
 
 			// Take action A
 			p.ExecuteBehavior(action)
@@ -162,8 +173,6 @@ func main() {
 
 			r = float32(math.Abs(t.GlobalPositions().Teams["single-agent"][1].BodyAngle)/90.0 - 1.0)
 
-			ball := p.GetBall()
-			fmt.Println(ball.Direction)
 			// if ball.NotSeenFor == 0 {
 			// 	ballDist := float32(ball.Distance)
 			// 	if ballDist < 0.7 {
