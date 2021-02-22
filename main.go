@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"math"
 	"os"
@@ -102,7 +101,7 @@ func main() {
 				break
 			}
 
-			if (currentTime % 400) == 0 {
+			if (currentTime % 1000) == 0 {
 				x, y := rcsscommon.RandomPosition()
 				t.MoveBall(x, y, 0, 0)
 			}
@@ -143,11 +142,19 @@ func main() {
 			// 	}
 			// }
 
-			action := 0
+			// Try and arrange behaviors for testing
+			var action int
 			if p.GetBall().NotSeenFor == 0 {
-				action = 1
+				if p.GetSelfData().X > 30 {
+					// Shoot ball
+					action = 2
+				} else {
+					// Lead ball
+					action = 1
+				}
 			} else {
-				fmt.Println("ball not seen for ", p.GetBall().NotSeenFor)
+				// fmt.Println("ball not seen for ", p.GetBall().NotSeenFor)
+				// Locate ball
 				action = 0
 			}
 

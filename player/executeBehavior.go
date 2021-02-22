@@ -7,6 +7,8 @@ func (p *Player) ExecuteBehavior(b int) string {
 		return p.bhvLocateBall()
 	case 1:
 		return p.bhvLeadBall()
+	case 2:
+		return p.bhvShoot()
 	}
 	return "(error invalid behavior index)"
 }
