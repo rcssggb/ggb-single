@@ -24,6 +24,8 @@ else
     exit
 fi
 
+docker network create ggb-network
+
 docker-compose up
 docker-compose down
 
