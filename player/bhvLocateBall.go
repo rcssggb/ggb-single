@@ -11,10 +11,14 @@ func (p *Player) bhvLocateBall() string {
 	if ball.NotSeenFor > 0 {
 		lastBallAngle := math.Atan2(ball.Y-self.Y, ball.X-self.X) * (180.0 / math.Pi)
 		amountToTurn := lastBallAngle - self.T + self.NeckAngle
-		if amountToTurn > 180 {
-			amountToTurn -= 360
-		} else if amountToTurn < -180 {
-			amountToTurn += 360
+		if ball.NotSeenFor > 30 {
+			amountToTurn = 45
+		} else {
+			if amountToTurn > 180 {
+				amountToTurn -= 360
+			} else if amountToTurn < -180 {
+				amountToTurn += 360
+			}
 		}
 		cmd += p.Client.Turn(amountToTurn)
 	} else if ball.NotSeenFor == 0 {
