@@ -1,13 +1,15 @@
 package player
 
-import "math"
+import (
+	"math"
+)
 
 func (p *Player) bhvLocateBall() string {
 	cmd := ""
 	ball := p.GetBall()
 	self := p.GetSelfData()
 	if ball.NotSeenFor > 0 {
-		lastBallAngle := math.Atan2(ball.Y-self.Y, ball.X-self.X)
+		lastBallAngle := math.Atan2(ball.Y-self.Y, ball.X-self.X) * (180.0 / math.Pi)
 		amountToTurn := lastBallAngle - self.T + self.NeckAngle
 		if amountToTurn > 180 {
 			amountToTurn -= 360
