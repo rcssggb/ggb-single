@@ -161,7 +161,7 @@ func main() {
 			currentTime = p.Client.Time()
 			r := float32(0)
 
-			r = float32(math.Abs(t.GlobalPositions().Teams["single-agent"][1].BodyAngle) / 180.0)
+			r = float32((math.Abs(t.GlobalPositions().Teams["single-agent"][1].BodyAngle) - 90) / 90.0)
 
 			// ball := p.GetBall()
 			// if ball.NotSeenFor == 0 {
@@ -282,6 +282,6 @@ func main() {
 				log.Printf("return history saved after %d games\n", gameCounter)
 			}
 		}
-		time.Sleep(2 * time.Second)
+		time.Sleep(1500 * time.Millisecond)
 	}
 }
