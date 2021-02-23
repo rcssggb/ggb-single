@@ -32,13 +32,19 @@ type QLearning struct {
 // Init instantiates the QTable
 func Init(nStates, nActions int) *QLearning {
 	qTableA := make([]actionValues, nStates)
-	for idx := range qTableA {
-		qTableA[idx] = make(actionValues, nActions)
+	for i := range qTableA {
+		qTableA[i] = make(actionValues, nActions)
+		for j := range qTableA[i] {
+			qTableA[i][j] = rand.NormFloat64() * 1000
+		}
 	}
 
 	qTableB := make([]actionValues, nStates)
-	for idx := range qTableB {
-		qTableB[idx] = make(actionValues, nActions)
+	for i := range qTableB {
+		qTableB[i] = make(actionValues, nActions)
+		for j := range qTableB[i] {
+			qTableB[i][j] = rand.NormFloat64() * 1000
+		}
 	}
 	return &QLearning{
 		a:        qTableA,

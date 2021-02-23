@@ -16,10 +16,11 @@ import (
 )
 
 func main() {
-	epsilon := 0.1
-	const alpha = 0.2
-	const epsilonDecay = 0.999
-	const alphaDecay = 1
+	epsilon := 0.3
+	const alpha = 0.1
+	const gamma = 0.99
+	const epsilonDecay = 0.9999
+	const alphaDecay = 1.0
 	naiveGames := 0
 	gameCounter := 0
 	// weightsFileA := "weightsA.rln"
@@ -36,7 +37,7 @@ func main() {
 	log.SetOutput(file)
 	log.SetFlags(log.Lmicroseconds | log.Lshortfile)
 
-	log.Printf("starting training with // epsilon = %f // alpha = %f // epsilonDecay = %f // naiveGames = %d", epsilon, alpha, epsilonDecay, naiveGames)
+	log.Printf("starting training with\n alpha = %f\n alphaDecay = %f\n epsilon = %f\n epsilonDecay = %f\n naiveGames = %d", alpha, alphaDecay, epsilon, epsilonDecay, naiveGames)
 
 	hostName := "rcssserver"
 
@@ -45,9 +46,9 @@ func main() {
 	// _, err = os.Stat(weightsFileA)
 	// if os.IsNotExist(err) {
 	log.Println("creating new agent")
-	qLearning = q.Init(24, 3)
+	qLearning = q.Init(360, 5)
 	qLearning.Alpha = alpha
-	qLearning.Gamma = 0.99
+	qLearning.Gamma = gamma
 	// } else {
 	// 	log.Printf("loading agent from %s\n", weightsFileA)
 	// 	qLearningA, err = q.Load(weightsFileA)
@@ -97,7 +98,7 @@ func main() {
 			var action int
 			takeRandomAction := rand.Float64() < epsilon
 			if takeRandomAction {
-				action = rand.Intn(3)
+				action = rand.Intn(5)
 			} else {
 				if naiveGames > 0 {
 					action = p.NaivePolicy()
