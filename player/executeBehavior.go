@@ -9,6 +9,8 @@ func (p *Player) ExecuteBehavior(b int) string {
 		return p.bhvLeadBall()
 	case 2:
 		return p.bhvShoot()
+	case 3:
+		return p.bhvWalkToBall()
 	}
 	return "(error invalid behavior index)"
 }

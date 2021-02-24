@@ -74,3 +74,28 @@ func (p *Player) NaivePolicy() int {
 
 	return action
 }
+
+// NaiveBehaviorPolicy performs the naive behavior using behaviors
+func (p *Player) NaiveBehaviorPolicy() int {
+	var action int
+
+	ball := p.GetBall()
+	body := p.GetSelfData()
+
+	if ball.NotSeenFor == 0 {
+		if body.X > 30 {
+			// Shoot ball
+			action = 2
+		} else if ball.Distance < 0.7 {
+			// Lead ball
+			action = 1
+		} else {
+			// Walk to ball
+			action = 3
+		}
+	} else {
+		// Locate ball
+		action = 0
+	}
+	return action
+}

@@ -13,13 +13,14 @@ func (p *Player) bhvLeadBall() string {
 		y := body.Y
 		angle := (180.0/math.Pi)*math.Atan2(y-body.Y, x-body.X) - body.T
 		cmd += p.Client.Kick(5, angle)
-	} else {
-		ballAngle := ball.Direction + body.NeckAngle
-		if -15 < ballAngle && ballAngle < 15 {
-			cmd += p.Client.Dash(50, ballAngle)
-		} else {
-			cmd += p.Client.Turn(ballAngle)
-		}
 	}
+	// } else {
+	// 	ballAngle := ball.Direction + body.NeckAngle
+	// 	if -15 < ballAngle && ballAngle < 15 {
+	// 		cmd += p.Client.Dash(60, ballAngle)
+	// 	} else {
+	// 		cmd += p.Client.Turn(ballAngle)
+	// 	}
+	// }
 	return cmd
 }

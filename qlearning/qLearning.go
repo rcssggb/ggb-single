@@ -25,7 +25,7 @@ type QLearning struct {
 // a discrete policy
 func Init() (*QLearning, error) {
 	q := QLearning{}
-	q.batchSize = 32
+	q.batchSize = 256
 	q.batchStates = []*tensor.Dense{}
 	q.batchTargets = []*tensor.Dense{}
 
@@ -35,15 +35,17 @@ func Init() (*QLearning, error) {
 	}
 
 	xShape := []int{1, 71}
-	yShape := []int{1, 16}
+	yShape := []int{1, 4}
 	in := m.NewInput("state", xShape)
 	out := m.NewInput("actionValue", yShape)
 
 	qModel.AddLayers(
 		layer.FC{Input: in.Squeeze()[0], Output: 128, Init: gorgonia.GlorotN(0.001), BiasInit: gorgonia.GlorotN(0.001)},
 		layer.FC{Input: 128, Output: 128, Init: gorgonia.GlorotN(0.001), BiasInit: gorgonia.GlorotN(0.001)},
-		layer.FC{Input: 128, Output: 128, Init: gorgonia.GlorotN(0.001), BiasInit: gorgonia.GlorotN(0.001)},
-		layer.FC{Input: 128, Output: out.Squeeze()[0], Activation: layer.Linear, Init: gorgonia.GlorotN(0.001), BiasInit: gorgonia.GlorotN(0.001)},
+		layer.FC{Input: 128, Output: 64, Init: gorgonia.GlorotN(0.001), BiasInit: gorgonia.GlorotN(0.001)},
+		layer.FC{Input: 64, Output: 32, Init: gorgonia.GlorotN(0.001), BiasInit: gorgonia.GlorotN(0.001)},
+		layer.FC{Input: 32, Output: 32, Init: gorgonia.GlorotN(0.001), BiasInit: gorgonia.GlorotN(0.001)},
+		layer.FC{Input: 32, Output: out.Squeeze()[0], Activation: layer.Linear, Init: gorgonia.GlorotN(0.001), BiasInit: gorgonia.GlorotN(0.001)},
 	)
 
 	err = qModel.Compile(in, out,
