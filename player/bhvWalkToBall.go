@@ -5,10 +5,6 @@ func (p *Player) bhvWalkToBall() string {
 	ball := p.GetBall()
 	body := p.GetSelfData()
 	ballAngle := ball.Direction + body.NeckAngle
-	if -15 < ballAngle && ballAngle < 15 {
-		cmd += p.Client.Dash(60, ballAngle)
-	} else {
-		cmd += p.Client.Turn(ballAngle)
-	}
+	cmd += p.Client.Dash(60, ballAngle)
 	return cmd
 }

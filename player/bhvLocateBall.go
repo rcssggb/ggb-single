@@ -21,14 +21,12 @@ func (p *Player) bhvLocateBall() string {
 			}
 		}
 		cmd += p.Client.Turn(amountToTurn)
-	} else if ball.NotSeenFor == 0 {
+	} else {
 		ballAngle := ball.Direction
 		amountToTurn := ballAngle / 5
 		amountToTurnNeck := ballAngle / 2
 		cmd += p.Client.Turn(amountToTurn)
 		cmd += p.Client.TurnNeck(amountToTurnNeck)
-	} else {
-		cmd += p.Client.Turn(30)
 	}
 	return cmd
 }

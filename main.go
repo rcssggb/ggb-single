@@ -171,11 +171,17 @@ func main() {
 			// 	r = 1.0 / ballDist
 			// }
 
+			epsilon = epsilon * epsilonDecay
 			if p.Client.PlayMode() == rcsscommon.PlayModeGoalL && currentTime > lastGoalTime {
 				lastGoalTime = currentTime
 				r = 1
 				p.Client.Log("goal!")
-				epsilon = epsilon * epsilonDecay
+			}
+
+			if p.Client.PlayMode() == rcsscommon.PlayModeGoalR && currentTime > lastGoalTime {
+				lastGoalTime = currentTime
+				r = -1
+				p.Client.Log("goal against, bad!")
 			}
 
 			returnValue += r

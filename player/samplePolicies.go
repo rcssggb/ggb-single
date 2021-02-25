@@ -83,7 +83,7 @@ func (p *Player) NaiveBehaviorPolicy() int {
 	body := p.GetSelfData()
 
 	if ball.NotSeenFor == 0 {
-		if body.X > 30 {
+		if body.X > 40 && ball.Distance < 0.7 {
 			// Shoot ball
 			action = 2
 		} else if ball.Distance < 0.7 {
