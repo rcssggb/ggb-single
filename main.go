@@ -21,10 +21,11 @@ func main() {
 	const gamma = 0.99
 	const epsilonDecay = 0.9999
 	const alphaDecay = 1.0
+	const nStates = 360
+	const nActions = 5
 	naiveGames := 0
 	gameCounter := 0
-	// weightsFileA := "weightsA.rln"
-	// weightsFileB := "weightsB.rln"
+	qTableFile := "qtable.rln"
 	returnsFile := "./data/returns.rln"
 
 	logName := time.Now().String() + ".log"
@@ -43,16 +44,16 @@ func main() {
 
 	var qLearning *q.QLearning
 
-	// _, err = os.Stat(weightsFileA)
-	// if os.IsNotExist(err) {
-	log.Println("creating new agent")
-	qLearning = q.Init(360, 5)
-	qLearning.Alpha = alpha
-	qLearning.Gamma = gamma
-	// } else {
-	// 	log.Printf("loading agent from %s\n", weightsFileA)
-	// 	qLearningA, err = q.Load(weightsFileA)
-	// }
+	_, err = os.Stat(qTableFile)
+	if os.IsNotExist(err) {
+		log.Println("creating new agent")
+		qLearning = q.Init(nStates, nActions)
+		qLearning.Alpha = alpha
+		qLearning.Gamma = gamma
+	} else {
+		log.Printf("loading agent from %s\n", qTableFile)
+		qLearning, err = q.Load(qTableFile)
+	}
 
 	returnValues := []float64{}
 	trainingStart := time.Now()
@@ -98,7 +99,7 @@ func main() {
 			var action int
 			takeRandomAction := rand.Float64() < epsilon
 			if takeRandomAction {
-				action = rand.Intn(5)
+				action = rand.Intn(nActions)
 			} else {
 				if naiveGames > 0 {
 					action = p.NaivePolicy()
@@ -167,15 +168,11 @@ func main() {
 		returnValues = append(returnValues, returnValue)
 
 		if gameCounter%50 == 0 {
-			// err = qLearningA.Save(weightsFileA)
-			// if err != nil {
-			// 	log.Println(err)
-			// }
-			// err = qLearningB.Save(weightsFileB)
-			// if err != nil {
-			// 	log.Println(err)
-			// }
-			// log.Printf("weights saved after %d games\n", gameCounter)
+			err = qLearning.Save(qTableFile)
+			if err != nil {
+				log.Println(err)
+			}
+			log.Printf("q table saved after %d games\n", gameCounter)
 			file, err := os.Create(returnsFile)
 			if err != nil {
 				log.Println(err)
