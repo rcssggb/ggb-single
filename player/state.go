@@ -2,10 +2,24 @@ package player
 
 // State returns the state vector
 func (p *Player) State() int {
-	self := p.GetSelfData()
-	state := (int(self.T) + 180)
-	if state >= 360 {
-		state -= 360
+	// self := p.GetSelfData()
+	ball := p.GetBall()
+
+	ballDirState := (int(ball.Direction) + 30) / 10
+	if ballDirState >= 12 {
+		ballDirState = 11
+	} else if ballDirState < 0 {
+		ballDirState = 0
 	}
+	state := ballDirState
+	shift := 6
+
+	seesBall := 0
+	if ball.NotSeenFor == 0 {
+		seesBall = 1
+	}
+	state += seesBall * shift
+	shift *= 2
+
 	return state
 }

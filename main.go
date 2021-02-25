@@ -17,11 +17,11 @@ import (
 
 func main() {
 	epsilon := 0.3
-	const alpha = 0.1
+	const alpha = 0.2
 	const gamma = 0.99
-	const epsilonDecay = 0.9999
-	const alphaDecay = 1.0
-	const nStates = 360
+	const epsilonDecay = 0.999
+	const alphaDecay = 0.9999
+	const nStates = 12
 	const nActions = 5
 	naiveGames := 0
 	gameCounter := 0
@@ -79,12 +79,12 @@ func main() {
 
 		// Initialize S
 		state := p.State()
-		startX, startY := rcsscommon.RandomPosition()
+		// startX, startY := rcsscommon.RandomPosition()
+		// if startX > 0 {
+		// 	startX = -startX
+		// }
 		startT := rand.Float64()*360 - 180
-		if startX > 0 {
-			startX = -startX
-		}
-		t.MovePlayer("single-agent", 1, startX, startY, startT, 0, 0)
+		t.MovePlayer("single-agent", 1, -30, 0, startT, 0, 0)
 		t.Start()
 		// lastGoalTime := -1
 		currentTime := 0
@@ -128,7 +128,9 @@ func main() {
 			currentTime = p.Client.Time()
 			r := float64(0)
 
-			r = float64((math.Abs(t.GlobalPositions().Teams["single-agent"][1].BodyAngle) - 90) / 90.0)
+			ppos := t.GlobalPositions().Teams["single-agent"][1]
+			bpos := t.GlobalPositions().Ball
+			r = -math.Abs(math.Atan2(bpos.Y-ppos.Y, bpos.X-ppos.X)-ppos.BodyAngle) / 180.0
 
 			// ball := p.GetBall()
 			// if ball.NotSeenFor == 0 {

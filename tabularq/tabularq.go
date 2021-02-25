@@ -37,7 +37,7 @@ func Init(nStates, nActions int) *QLearning {
 	for i := range qTableA {
 		qTableA[i] = make(actionValues, nActions)
 		for j := range qTableA[i] {
-			qTableA[i][j] = rand.NormFloat64() * 1000
+			qTableA[i][j] = -6000
 		}
 	}
 
@@ -45,7 +45,7 @@ func Init(nStates, nActions int) *QLearning {
 	for i := range qTableB {
 		qTableB[i] = make(actionValues, nActions)
 		for j := range qTableB[i] {
-			qTableB[i][j] = rand.NormFloat64() * 1000
+			qTableB[i][j] = -6000
 		}
 	}
 	return &QLearning{
