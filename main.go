@@ -188,6 +188,8 @@ func main() {
 
 			file.Close()
 			log.Printf("return history saved after %d games\n", gameCounter)
+			log.Printf("current parameters\n alpha = %f\n epsilon = %f\n", qLearning.Alpha, epsilon)
+
 		}
 		time.Sleep(1500 * time.Millisecond)
 	}
