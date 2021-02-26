@@ -16,12 +16,12 @@ import (
 )
 
 func main() {
-	epsilon := 0.3
-	const alpha = 0.2
+	epsilon := 1.0
+	const alpha = 0.5
 	const gamma = 0.99
 	const epsilonDecay = 0.999
-	const alphaDecay = 0.9999
-	const nStates = 12
+	const alphaDecay = 0.9995
+	const nStates = 24
 	const nActions = 5
 	naiveGames := 0
 	gameCounter := 0
@@ -79,12 +79,12 @@ func main() {
 
 		// Initialize S
 		state := p.State()
-		// startX, startY := rcsscommon.RandomPosition()
-		// if startX > 0 {
-		// 	startX = -startX
-		// }
+		startX, startY := rcsscommon.RandomPosition()
+		if startX > 0 {
+			startX = -startX
+		}
 		startT := rand.Float64()*360 - 180
-		t.MovePlayer("single-agent", 1, -30, 0, startT, 0, 0)
+		t.MovePlayer("single-agent", 1, startX, startY, startT, 0, 0)
 		t.Start()
 		// lastGoalTime := -1
 		currentTime := 0
