@@ -36,17 +36,17 @@ func Init(nStates, nActions int) *QLearning {
 	qTableA := make([]actionValues, nStates)
 	for i := range qTableA {
 		qTableA[i] = make(actionValues, nActions)
-		for j := range qTableA[i] {
-			qTableA[i][j] = -6000
-		}
+		// for j := range qTableA[i] {
+		// 	qTableA[i][j] = -6000
+		// }
 	}
 
 	qTableB := make([]actionValues, nStates)
 	for i := range qTableB {
 		qTableB[i] = make(actionValues, nActions)
-		for j := range qTableB[i] {
-			qTableB[i][j] = -6000
-		}
+		// for j := range qTableB[i] {
+		// 	qTableB[i][j] = -6000
+		// }
 	}
 	return &QLearning{
 		A:          qTableA,

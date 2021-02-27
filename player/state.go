@@ -14,6 +14,15 @@ func (p *Player) State() int {
 	state := ballDirState
 	shift := 12
 
+	ballDistState := (int(ball.Distance) / 10)
+	if ballDistState > 5 {
+		ballDistState = 5
+	} else if ballDistState < 0 {
+		ballDistState = 0
+	}
+	state += ballDistState * shift
+	shift *= 6
+
 	seesBall := 0
 	if ball.NotSeenFor == 0 {
 		seesBall = 1
