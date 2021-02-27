@@ -48,12 +48,12 @@ func main() {
 	if os.IsNotExist(err) {
 		log.Println("creating new agent")
 		qLearning = q.Init(nStates, nActions)
-		qLearning.Alpha = alpha
-		qLearning.Gamma = gamma
 	} else {
 		log.Printf("loading agent from %s\n", qTableFile)
 		qLearning, err = q.Load(qTableFile)
 	}
+	qLearning.Gamma = gamma
+	qLearning.Alpha = alpha
 
 	returnValues := []float64{}
 	trainingStart := time.Now()
@@ -79,12 +79,12 @@ func main() {
 
 		// Initialize S
 		state := p.State()
-		// startX, startY := rcsscommon.RandomPosition()
-		// if startX > 0 {
-		// 	startX = -startX
-		// }
+		startX, startY := rcsscommon.RandomPosition()
+		if startX > 0 {
+			startX = -startX
+		}
 		startT := rand.Float64()*360 - 180
-		t.MovePlayer("single-agent", 1, -30, 0, startT, 0, 0)
+		t.MovePlayer("single-agent", 1, startX, startY, startT, 0, 0)
 		t.Start()
 		// lastGoalTime := -1
 		currentTime := 0
