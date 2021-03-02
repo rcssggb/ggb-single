@@ -75,7 +75,7 @@ func main() {
 		p.Client.SynchSee()
 		p.Client.ChangeView(rcsscommon.ViewWidthNarrow, rcsscommon.ViewQualityHigh)
 
-		time.Sleep(1 * time.Second)
+		time.Sleep(500 * time.Millisecond)
 
 		// Initialize S
 		state := p.State()

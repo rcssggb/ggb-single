@@ -1,5 +1,7 @@
 package player
 
+import "math"
+
 // State returns the state vector
 func (p *Player) State() int {
 	// self := p.GetSelfData()
@@ -14,7 +16,11 @@ func (p *Player) State() int {
 	state := ballDirState
 	shift := 12
 
-	ballDistState := (int(ball.Distance) / 10)
+	ballDist := ball.Distance
+	if ballDist < 1 {
+		ballDist = 1
+	}
+	ballDistState := int(math.Log2(ballDist))
 	if ballDistState > 5 {
 		ballDistState = 5
 	} else if ballDistState < 0 {
