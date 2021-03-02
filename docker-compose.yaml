@@ -19,24 +19,24 @@ services:
       options:
         max-size: 50m
 
-  # rcssmonitor:
-  #   tty: true
-  #   container_name: rcssmonitor
-  #   image: rcssggb/rcssmonitor:latest
-  #   command: bash -c "rcssmonitor --server-host rcssserver --auto-quit-mode on --auto-reconnect-mode on --auto-reconnect-wait 1 --auto-quit-wait 1"
-  #   restart: always
-  #   networks:
-  #     - ggb-network
-  #   environment:
-  #     - DISPLAY=${DISPLAY}
-  #     - QT_X11_NO_MITSHM=1
-  #   volumes:
-  #     - /tmp/.X11-unix:/tmp/.X11-unix
-  #   logging:
-  #     options:
-  #       max-size: 50m
-  #   depends_on:
-  #     - rcssserver
+  rcssmonitor:
+    tty: true
+    container_name: rcssmonitor
+    image: rcssggb/rcssmonitor:latest
+    command: bash -c "rcssmonitor --server-host rcssserver --auto-quit-mode on --auto-reconnect-mode on --auto-reconnect-wait 1 --auto-quit-wait 1"
+    restart: always
+    networks:
+      - ggb-network
+    environment:
+      - DISPLAY=${DISPLAY}
+      - QT_X11_NO_MITSHM=1
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    logging:
+      options:
+        max-size: 50m
+    depends_on:
+      - rcssserver
 
   single-agent:
     tty: true
