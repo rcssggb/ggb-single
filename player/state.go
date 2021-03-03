@@ -17,17 +17,19 @@ func (p *Player) State() int {
 	shift := 12
 
 	ballDist := ball.Distance
+	ballDistScaleFactor := 0.7
+	ballDist /= ballDistScaleFactor
 	if ballDist < 1 {
 		ballDist = 1
 	}
 	ballDistState := int(math.Log2(ballDist))
-	if ballDistState > 5 {
-		ballDistState = 5
+	if ballDistState > 6 {
+		ballDistState = 6
 	} else if ballDistState < 0 {
 		ballDistState = 0
 	}
 	state += ballDistState * shift
-	shift *= 6
+	shift *= 7
 
 	seesBall := 0
 	if ball.NotSeenFor == 0 {

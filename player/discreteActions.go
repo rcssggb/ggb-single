@@ -14,7 +14,9 @@ func (p *Player) DiscreteAction(a int) string {
 	case 4:
 		return p.Client.Turn(-15)
 	case 5:
-		return p.Client.Dash(20, 0)
+		return p.Client.Dash(30, 0)
+	case 6:
+		return p.Client.Kick(25, 0)
 	}
 	return "(error invalid action index)"
 }

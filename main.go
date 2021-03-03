@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/gob"
 	"log"
-	"math"
 	"math/rand"
 	"os"
 	"path"
@@ -19,10 +18,10 @@ func main() {
 	epsilon := 1.0
 	const alpha = 0.5
 	const gamma = 0.99
-	const epsilonDecay = 0.999
+	const epsilonDecay = 0.9993
 	const alphaDecay = 0.9995
-	const nStates = 144
-	const nActions = 6
+	const nStates = 168
+	const nActions = 7
 	naiveGames := 0
 	gameCounter := 0
 	qTableFile := "qtable.rln"
@@ -75,7 +74,7 @@ func main() {
 		p.Client.SynchSee()
 		p.Client.ChangeView(rcsscommon.ViewWidthNarrow, rcsscommon.ViewQualityHigh)
 
-		time.Sleep(500 * time.Millisecond)
+		time.Sleep(200 * time.Millisecond)
 
 		// Initialize S
 		state := p.State()
@@ -86,7 +85,7 @@ func main() {
 		startT := rand.Float64()*360 - 180
 		t.MovePlayer("single-agent", 1, startX, startY, startT, 0, 0)
 		t.Start()
-		// lastGoalTime := -1
+		lastTime := -1
 		currentTime := 0
 		returnValue := float64(0)
 		for {
@@ -125,12 +124,16 @@ func main() {
 
 			// Observe R, S'
 			nextState := p.State()
+			lastTime = currentTime
 			currentTime = p.Client.Time()
 			r := float64(0)
 
-			ppos := t.GlobalPositions().Teams["single-agent"][1]
-			bpos := t.GlobalPositions().Ball
-			r = -math.Sqrt(math.Pow(bpos.Y-ppos.Y, 2)+math.Pow(bpos.X-ppos.X, 2)) / 6000.0
+			if currentTime > lastTime {
+				bpos := t.GlobalPositions().Ball
+				if bpos.DeltaX != 0 || bpos.DeltaY != 0 {
+					r = 1
+				}
+			}
 
 			// ball := p.GetBall()
 			// if ball.NotSeenFor == 0 {
