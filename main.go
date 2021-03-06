@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/gob"
 	"log"
+	"math"
 	"math/rand"
 	"os"
 	"path"
@@ -15,12 +16,12 @@ import (
 )
 
 func main() {
-	epsilon := 1.0
-	const alpha = 0.5
+	epsilon := 0.9
+	const alpha = 0.1
 	const gamma = 0.99
-	const epsilonDecay = 0.9993
-	const alphaDecay = 0.9995
-	const nStates = 168
+	const epsilonDecay = 0.9999
+	const alphaDecay = 1.0
+	const nStates = 840
 	const nActions = 7
 	naiveGames := 0
 	gameCounter := 0
@@ -56,15 +57,24 @@ func main() {
 
 	returnValues := []float64{}
 	trainingStart := time.Now()
+	errCount := 0
 	for {
 		p, err := player.NewPlayer("single-agent", hostName)
 		if err != nil {
+			errCount++
+			if errCount > 10 {
+				panic(err)
+			}
 			log.Println(err)
 			continue
 		}
 
 		t, err := trainerclient.NewTrainerClient(hostName)
 		if err != nil {
+			errCount++
+			if errCount > 10 {
+				panic(err)
+			}
 			log.Println(err)
 			continue
 		}
@@ -74,18 +84,18 @@ func main() {
 		p.Client.SynchSee()
 		p.Client.ChangeView(rcsscommon.ViewWidthNarrow, rcsscommon.ViewQualityHigh)
 
-		time.Sleep(200 * time.Millisecond)
+		time.Sleep(100 * time.Millisecond)
 
 		// Initialize S
 		state := p.State()
-		startX, startY := rcsscommon.RandomPosition()
-		if startX > 0 {
-			startX = -startX
-		}
+		// startX, startY := rcsscommon.RandomPosition()
+		// if startX > 0 {
+		// 	startX = -startX
+		// }
 		startT := rand.Float64()*360 - 180
-		t.MovePlayer("single-agent", 1, startX, startY, startT, 0, 0)
+		t.MovePlayer("single-agent", 1, -30, 0, startT, 0, 0)
 		t.Start()
-		lastTime := -1
+		// lastGoalTime := -1
 		currentTime := 0
 		returnValue := float64(0)
 		for {
@@ -123,33 +133,38 @@ func main() {
 			p.WaitCycle()
 
 			// Observe R, S'
-			nextState := p.State()
-			lastTime = currentTime
+			lastTime := currentTime
 			currentTime = p.Client.Time()
-			r := float64(0)
 
-			if currentTime > lastTime {
-				bpos := t.GlobalPositions().Ball
-				if bpos.DeltaX != 0 || bpos.DeltaY != 0 {
-					r = 1
-				}
+			// Wait until simulation cycle changes (1 action per simulation cycle)
+			for currentTime == lastTime {
+				t.DoneSynch()
+				p.WaitCycle()
+				lastTime = currentTime
+				currentTime = p.Client.Time()
 			}
 
-			// ball := p.GetBall()
-			// if ball.NotSeenFor == 0 {
-			// 	ballDist := float32(ball.Distance)
-			// 	if ballDist < 0.7 {
-			// 		ballDist = 0.7
-			// 		epsilon *= epsilonDecay
-			// 	}
-			// 	r = 1.0 / ballDist
-			// }
+			nextState := p.State()
+			r := float64(0)
 
-			// if p.Client.PlayMode() == rcsscommon.PlayModeGoalL && currentTime > lastGoalTime {
+			ppos := t.GlobalPositions().Teams["single-agent"][1]
+			bpos := t.GlobalPositions().Ball
+
+			distToBall := math.Sqrt(math.Pow(bpos.X-ppos.X, 2) + math.Pow(bpos.Y-ppos.Y, 2))
+			r += -distToBall * 0.001 / 6000.0
+
+			r += bpos.DeltaX / 6000.0
+
+			// gx, gy := rcsscommon.FlagRightGoal.Position()
+			// r += -math.Sqrt(math.Pow(bpos.X-gx, 2)+math.Pow(bpos.Y-gy, 2)) / gx * 0.0001
+
+			// if currentTime > lastGoalTime {
 			// 	lastGoalTime = currentTime
-			// 	r = 1
-			// 	p.Client.Log("goal!")
-			// 	epsilon = epsilon * epsilonDecay
+			// 	if p.Client.PlayMode() == rcsscommon.PlayModeGoalL {
+			// 		r += 1.0
+			// 	} else if p.Client.PlayMode() == rcsscommon.PlayModeGoalR {
+			// 		r += -1.0
+			// 	}
 			// }
 
 			returnValue += r

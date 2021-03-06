@@ -21,7 +21,6 @@ type Player struct {
 func NewPlayer(team, host string) (*Player, error) {
 	client, err := playerclient.NewPlayerClient(team, host)
 	if err != nil {
-		client.Bye()
 		return nil, err
 	}
 

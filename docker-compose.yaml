@@ -23,7 +23,7 @@ services:
     tty: true
     container_name: rcssmonitor
     image: rcssggb/rcssmonitor:latest
-    command: bash -c "rcssmonitor --server-host rcssserver --auto-quit-mode on --auto-reconnect-mode on --auto-reconnect-wait 1 --auto-quit-wait 1"
+    command: bash -c "rcssmonitor --server-host rcssserver --auto-reconnect-mode on --auto-reconnect-wait 1"
     restart: always
     networks:
       - ggb-network

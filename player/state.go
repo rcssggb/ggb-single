@@ -1,20 +1,29 @@
 package player
 
-import "math"
+import (
+	"math"
+)
 
 // State returns the state vector
 func (p *Player) State() int {
-	// self := p.GetSelfData()
+	self := p.GetSelfData()
 	ball := p.GetBall()
 
-	ballDirState := (int(ball.Direction) + 30) / 5
-	if ballDirState >= 12 {
-		ballDirState = 11
+	ballDir := ball.Direction
+	if ballDir >= 30 {
+		ballDir = 29.99
+	} else if ballDir < -30 {
+		ballDir = -30
+	}
+	ballDir += 30
+	ballDirState := int(ballDir) / 5
+	if ballDirState > 4 {
+		ballDirState = 4
 	} else if ballDirState < 0 {
 		ballDirState = 0
 	}
 	state := ballDirState
-	shift := 12
+	shift := 5
 
 	ballDist := ball.Distance
 	ballDistScaleFactor := 0.7
@@ -30,6 +39,47 @@ func (p *Player) State() int {
 	}
 	state += ballDistState * shift
 	shift *= 7
+
+	// playerX := self.X
+	// if playerX > rcsscommon.FieldMaxX {
+	// 	playerX = rcsscommon.FieldMaxX - 0.01
+	// } else if playerX < -rcsscommon.FieldMaxX {
+	// 	playerX = -rcsscommon.FieldMaxX
+	// }
+	// playerX += rcsscommon.FieldMaxX
+	// playerXState := int(playerX) / 10
+	// if playerXState > 9 {
+	// 	playerXState = 9
+	// } else if playerXState < 0 {
+	// 	playerXState = 0
+	// }
+	// state += playerXState * shift
+	// shift *= 10
+
+	// playerY := self.Y
+	// if playerY > rcsscommon.FieldMaxY {
+	// 	playerY = rcsscommon.FieldMaxY - 0.01
+	// } else if playerY < -rcsscommon.FieldMaxY {
+	// 	playerY = -rcsscommon.FieldMaxY
+	// }
+	// playerY += rcsscommon.FieldMaxY
+	// playerYState := int(playerY) / 7
+	// if playerYState > 6 {
+	// 	playerYState = 6
+	// } else if playerYState < 0 {
+	// 	playerYState = 0
+	// }
+	// state += playerYState * shift
+	// shift *= 7
+
+	playerT := int((self.T + 180)) / 12
+	if playerT > 11 {
+		playerT = 11
+	} else if playerT < 0 {
+		playerT = 0
+	}
+	state += playerT * shift
+	shift *= 12
 
 	seesBall := 0
 	if ball.NotSeenFor == 0 {
