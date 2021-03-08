@@ -7,11 +7,11 @@ func (p *Player) State() []float64 {
 	self := p.GetSelfData()
 	ball := p.GetBall()
 	serverParams := p.Client.ServerParams()
-	playModeOneHot := p.Client.PlayMode().OneHot()
+	// playModeOneHot := p.Client.PlayMode().OneHot()
 	ret := []float64{
-		self.Stamina / serverParams.StaminaMax,
-		self.Effort,
-		self.Capacity / serverParams.StaminaCapacity,
+		// self.Stamina / serverParams.StaminaMax,
+		// self.Effort,
+		// self.Capacity / serverParams.StaminaCapacity,
 		self.X / rcsscommon.FieldMaxX,
 		self.Y / rcsscommon.FieldMaxY,
 		self.T / 180.0,
@@ -25,10 +25,10 @@ func (p *Player) State() []float64 {
 		ball.Direction / 180.0,
 		ball.DistChange / serverParams.BallSpeedMax,
 		ball.DirChange, // TODO: don't know how to normalize this one
-		ball.X / rcsscommon.FieldMaxX,
-		ball.Y / rcsscommon.FieldMaxY,
-		ball.VelX / serverParams.BallSpeedMax,
-		ball.VelY / serverParams.BallSpeedMax,
+		// ball.X / rcsscommon.FieldMaxX,
+		// ball.Y / rcsscommon.FieldMaxY,
+		// ball.VelX / serverParams.BallSpeedMax,
+		// ball.VelY / serverParams.BallSpeedMax,
 	}
-	return append(ret, playModeOneHot...)
+	return ret
 }
