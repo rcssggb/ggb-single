@@ -2,6 +2,8 @@ package player
 
 import (
 	"math"
+
+	"github.com/rcssggb/ggb-lib/rcsscommon"
 )
 
 // State returns the state vector
@@ -40,21 +42,21 @@ func (p *Player) State() int {
 	state += ballDistState * shift
 	shift *= 7
 
-	// playerX := self.X
-	// if playerX > rcsscommon.FieldMaxX {
-	// 	playerX = rcsscommon.FieldMaxX - 0.01
-	// } else if playerX < -rcsscommon.FieldMaxX {
-	// 	playerX = -rcsscommon.FieldMaxX
-	// }
-	// playerX += rcsscommon.FieldMaxX
-	// playerXState := int(playerX) / 10
-	// if playerXState > 9 {
-	// 	playerXState = 9
-	// } else if playerXState < 0 {
-	// 	playerXState = 0
-	// }
-	// state += playerXState * shift
-	// shift *= 10
+	playerX := self.X
+	if playerX > rcsscommon.FieldMaxX {
+		playerX = rcsscommon.FieldMaxX - 0.01
+	} else if playerX < -rcsscommon.FieldMaxX {
+		playerX = -rcsscommon.FieldMaxX
+	}
+	playerX += rcsscommon.FieldMaxX
+	playerXState := int(playerX) / 10
+	if playerXState > 9 {
+		playerXState = 9
+	} else if playerXState < 0 {
+		playerXState = 0
+	}
+	state += playerXState * shift
+	shift *= 10
 
 	// playerY := self.Y
 	// if playerY > rcsscommon.FieldMaxY {

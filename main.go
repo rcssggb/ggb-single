@@ -20,8 +20,8 @@ func main() {
 	const alpha = 0.1
 	const gamma = 0.99
 	const epsilonDecay = 0.9999
-	const alphaDecay = 1.0
-	const nStates = 840
+	const alphaDecay = 0.99999
+	const nStates = 8400
 	const nActions = 7
 	naiveGames := 0
 	gameCounter := 0
@@ -95,13 +95,16 @@ func main() {
 		startT := rand.Float64()*360 - 180
 		t.MovePlayer("single-agent", 1, -30, 0, startT, 0, 0)
 		t.Start()
-		// lastGoalTime := -1
+		lastGoalTime := -1
 		currentTime := 0
 		returnValue := float64(0)
 		for {
 			if p.Client.PlayMode() == rcsscommon.PlayModeTimeOver {
 				p.Client.Log(p.Client.Bye())
 				break
+			}
+			if p.Client.PlayMode() == rcsscommon.PlayModeBeforeKickOff {
+				t.MovePlayer("single-agent", 1, -30, 0, 0, 0, 0)
 			}
 
 			// Choose A from S using policy derived from Q (e.g., epsilon-greedy)
@@ -158,14 +161,14 @@ func main() {
 			// gx, gy := rcsscommon.FlagRightGoal.Position()
 			// r += -math.Sqrt(math.Pow(bpos.X-gx, 2)+math.Pow(bpos.Y-gy, 2)) / gx * 0.0001
 
-			// if currentTime > lastGoalTime {
-			// 	lastGoalTime = currentTime
-			// 	if p.Client.PlayMode() == rcsscommon.PlayModeGoalL {
-			// 		r += 1.0
-			// 	} else if p.Client.PlayMode() == rcsscommon.PlayModeGoalR {
-			// 		r += -1.0
-			// 	}
-			// }
+			if currentTime > lastGoalTime {
+				lastGoalTime = currentTime
+				if p.Client.PlayMode() == rcsscommon.PlayModeGoalL {
+					r += 1.0
+				} else if p.Client.PlayMode() == rcsscommon.PlayModeGoalR {
+					r += -1.0
+				}
+			}
 
 			returnValue += r
 
