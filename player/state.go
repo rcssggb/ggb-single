@@ -11,22 +11,6 @@ func (p *Player) State() int {
 	self := p.GetSelfData()
 	ball := p.GetBall()
 
-	ballDir := ball.Direction
-	if ballDir >= 30 {
-		ballDir = 29.99
-	} else if ballDir < -30 {
-		ballDir = -30
-	}
-	ballDir += 30
-	ballDirState := int(ballDir) / 5
-	if ballDirState > 4 {
-		ballDirState = 4
-	} else if ballDirState < 0 {
-		ballDirState = 0
-	}
-	state := ballDirState
-	shift := 5
-
 	ballDist := ball.Distance
 	ballDistScaleFactor := 0.7
 	ballDist /= ballDistScaleFactor
@@ -39,49 +23,8 @@ func (p *Player) State() int {
 	} else if ballDistState < 0 {
 		ballDistState = 0
 	}
-	state += ballDistState * shift
-	shift *= 7
-
-	playerX := self.X
-	if playerX > rcsscommon.FieldMaxX {
-		playerX = rcsscommon.FieldMaxX - 0.01
-	} else if playerX < -rcsscommon.FieldMaxX {
-		playerX = -rcsscommon.FieldMaxX
-	}
-	playerX += rcsscommon.FieldMaxX
-	playerXState := int(playerX) / 10
-	if playerXState > 9 {
-		playerXState = 9
-	} else if playerXState < 0 {
-		playerXState = 0
-	}
-	state += playerXState * shift
-	shift *= 10
-
-	// playerY := self.Y
-	// if playerY > rcsscommon.FieldMaxY {
-	// 	playerY = rcsscommon.FieldMaxY - 0.01
-	// } else if playerY < -rcsscommon.FieldMaxY {
-	// 	playerY = -rcsscommon.FieldMaxY
-	// }
-	// playerY += rcsscommon.FieldMaxY
-	// playerYState := int(playerY) / 7
-	// if playerYState > 6 {
-	// 	playerYState = 6
-	// } else if playerYState < 0 {
-	// 	playerYState = 0
-	// }
-	// state += playerYState * shift
-	// shift *= 7
-
-	playerT := int((self.T + 180)) / 12
-	if playerT > 11 {
-		playerT = 11
-	} else if playerT < 0 {
-		playerT = 0
-	}
-	state += playerT * shift
-	shift *= 12
+	state := ballDistState
+	shift := 7
 
 	seesBall := 0
 	if ball.NotSeenFor == 0 {
@@ -89,6 +32,82 @@ func (p *Player) State() int {
 	}
 	state += seesBall * shift
 	shift *= 2
+
+	ballDir := ball.Direction
+	const halfSizeBallDir = 30.0
+	const nStatesBallDir = 5
+	const stateSizeBallDir = 2 * halfSizeBallDir / nStatesBallDir
+	if ballDir >= halfSizeBallDir {
+		ballDir = halfSizeBallDir - 0.01
+	} else if ballDir < -halfSizeBallDir {
+		ballDir = -halfSizeBallDir
+	}
+	ballDir += halfSizeBallDir
+	ballDirState := int(ballDir / stateSizeBallDir)
+	if ballDirState >= nStatesBallDir {
+		ballDirState = nStatesBallDir - 1
+	} else if ballDirState < 0 {
+		ballDirState = 0
+	}
+	state += ballDirState * shift
+	shift *= nStatesBallDir
+
+	playerX := self.X
+	const halfSizeX = rcsscommon.FieldMaxX + 5
+	const nStatesX = 10
+	const stateSizeX = 2 * halfSizeX / nStatesX
+	if playerX > halfSizeX {
+		playerX = halfSizeX - 0.01
+	} else if playerX < -halfSizeX {
+		playerX = -halfSizeX
+	}
+	playerX += halfSizeX
+	playerXState := int(playerX / stateSizeX)
+	if playerXState >= nStatesX {
+		playerXState = nStatesX - 1
+	} else if playerXState < 0 {
+		playerXState = 0
+	}
+	state += playerXState * shift
+	shift *= nStatesX
+
+	playerY := self.Y
+	const halfSizeY = rcsscommon.FieldMaxY + 5
+	const nStatesY = 7
+	const stateSizeY = 2 * halfSizeY / nStatesY
+	if playerY > halfSizeY {
+		playerY = halfSizeY - 0.01
+	} else if playerY < -halfSizeY {
+		playerY = -halfSizeY
+	}
+	playerY += halfSizeY
+	playerYState := int(playerY / stateSizeY)
+	if playerYState >= nStatesY {
+		playerYState = nStatesY - 1
+	} else if playerYState < 0 {
+		playerYState = 0
+	}
+	state += playerYState * shift
+	shift *= nStatesY
+
+	playerT := self.T
+	const halfSizeT = 180.0
+	const nStatesT = 24
+	const stateSizeT = 2 * halfSizeT / nStatesT
+	if playerT > halfSizeT {
+		playerT = halfSizeT - 0.01
+	} else if playerT < -halfSizeT {
+		playerT = -halfSizeT
+	}
+	playerT += halfSizeT
+	playerTState := int(playerT / stateSizeT)
+	if playerTState >= nStatesT {
+		playerTState = nStatesT - 1
+	} else if playerTState < 0 {
+		playerTState = 0
+	}
+	state += playerTState * shift
+	shift *= nStatesT
 
 	return state
 }
