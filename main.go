@@ -22,7 +22,7 @@ func main() {
 	const epsilonDecay = 0.99992
 	const alphaDecay = 0.99999
 	const nStates = 117600
-	const nActions = 7
+	const nActions = 13
 	naiveGames := 0
 	gameCounter := 0
 	qTableFile := "qtable.rln"
@@ -185,7 +185,7 @@ func main() {
 		epsilon *= epsilonDecay
 		qLearning.Alpha *= alphaDecay
 		timeSinceStart := time.Now().Sub(trainingStart)
-		log.Printf("game: %d | return: %f | total time: %s | time/game: %.1f\n", gameCounter, returnValue, timeSinceStart, timeSinceStart.Seconds()/float64(gameCounter))
+		log.Printf("game: %d | return: %f | total time: %s | avg time/game: %.2fs\n", gameCounter, returnValue, timeSinceStart, timeSinceStart.Seconds()/float64(gameCounter))
 
 		// Write return at the end of episode
 		returnValues = append(returnValues, returnValue)
@@ -212,6 +212,6 @@ func main() {
 			log.Printf("current parameters\n alpha = %f\n epsilon = %f\n", qLearning.Alpha, epsilon)
 
 		}
-		time.Sleep(1500 * time.Millisecond)
+		time.Sleep(1300 * time.Millisecond)
 	}
 }
