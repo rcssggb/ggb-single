@@ -19,7 +19,7 @@ func main() {
 	epsilon := 0.9
 	const alpha = 0.1
 	const gamma = 0.99
-	const epsilonDecay = 0.99992
+	const epsilonDecay = 0.99995
 	const alphaDecay = 0.99999
 	const nStates = 117600
 	const nActions = 13
@@ -88,12 +88,12 @@ func main() {
 
 		// Initialize S
 		state := p.State()
-		// startX, startY := rcsscommon.RandomPosition()
-		// if startX > 0 {
-		// 	startX = -startX
-		// }
+		startX, startY := rcsscommon.RandomPosition()
+		if startX > 0 {
+			startX = -startX
+		}
 		startT := rand.Float64()*360 - 180
-		t.MovePlayer("single-agent", 1, -30, 0, startT, 0, 0)
+		t.MovePlayer("single-agent", 1, startX, startY, startT, 0, 0)
 		t.Start()
 		lastGoalTime := -1
 		currentTime := 0
@@ -104,7 +104,7 @@ func main() {
 				break
 			}
 			if p.Client.PlayMode() == rcsscommon.PlayModeBeforeKickOff {
-				t.MovePlayer("single-agent", 1, -30, 0, 0, 0, 0)
+				t.MovePlayer("single-agent", 1, startX, startY, startT, 0, 0)
 			}
 
 			// Choose A from S using policy derived from Q (e.g., epsilon-greedy)
