@@ -11,33 +11,31 @@ services:
     image: rcssggb/rcssserver:latest
     networks:
       - ggb-network
-    command: bash -c "while true; do /usr/local/bin/rcssserver --server::coach_w_referee=true --server::game_log_dir='/root/logs' --server::text_log_dir='/root/logs' --server::synch_mode=1 --server::auto_mode=true --server::game_over_wait=2 --server::connect_wait=3000 --server::ball_stuck_area=0; done"
+    command: bash -c "while true; do /usr/local/bin/rcssserver --server::coach_w_referee=true --server::ball_stuck_area=0 --server::game_log_dir='/root/logs/game' --server::text_log_dir='/root/logs/text' --server::text_log_dir='/root/logs/keepaway' --server::synch_mode=1 --server::auto_mode=true --server::game_over_wait=2 server::connect_wait=3000 --server::text_logging=false --server::game_logging=false --server::keepaway_logging=false; done"
     restart: always
     # volumes:
     #   - ./logs:/root/logs
     logging:
       options:
         max-size: 50m
-
-  # rcssmonitor:
-  #   tty: true
-  #   container_name: rcssmonitor
-  #   image: rcssggb/rcssmonitor:latest
-  #   command: bash -c "rcssmonitor --server-host rcssserver --auto-quit-mode on --auto-reconnect-mode on --auto-reconnect-wait 1 --auto-quit-wait 1"
-  #   restart: always
-  #   networks:
-  #     - ggb-network
-  #   environment:
-  #     - DISPLAY=${DISPLAY}
-  #     - QT_X11_NO_MITSHM=1
-  #   volumes:
-  #     - /tmp/.X11-unix:/tmp/.X11-unix
-  #   logging:
-  #     options:
-  #       max-size: 50m
-  #   depends_on:
-  #     - rcssserver
-
+  rcssmonitor:
+    tty: true
+    container_name: rcssmonitor
+    image: rcssggb/rcssmonitor:latest
+    command: bash -c "rcssmonitor --server-host rcssserver --auto-quit-mode on --auto-reconnect-mode on --auto-reconnect-wait 1 --auto-quit-wait 1"
+    restart: always
+    networks:
+      - ggb-network
+    environment:
+      - DISPLAY=${DISPLAY}
+      - QT_X11_NO_MITSHM=1
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    logging:
+      options:
+        max-size: 50m
+    depends_on:
+      - rcssserver
   single-agent:
     tty: true
     container_name: single-agent
