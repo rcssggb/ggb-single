@@ -4,7 +4,7 @@ package player
 func (p *Player) DiscreteAction(a int) string {
 	switch a {
 	case 0:
-		return ""
+		return "" // do nothing
 	case 1:
 		return p.Client.Turn(7)
 	case 2:

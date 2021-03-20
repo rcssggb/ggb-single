@@ -11,7 +11,19 @@ func (p *Player) State() int {
 	self := p.GetSelfData()
 	ball := p.GetBall()
 
-	ballDist := ball.Distance
+	seesBall := 0
+	if ball.NotSeenFor == 0 {
+		seesBall = 1
+	}
+	state := seesBall
+	shift := 2
+
+	var ballDist float64
+	if seesBall == 1 {
+		ballDist = ball.Distance
+	} else {
+		ballDist = math.Sqrt(math.Pow(ball.X-self.X, 2) + math.Pow(ball.Y-self.Y, 2))
+	}
 	ballDistScaleFactor := 0.7
 	ballDist /= ballDistScaleFactor
 	if ballDist < 1 {
@@ -23,24 +35,22 @@ func (p *Player) State() int {
 	} else if ballDistState < 0 {
 		ballDistState = 0
 	}
-	state := ballDistState
-	shift := 7
+	state += ballDistState * shift
+	shift *= 7
 
-	seesBall := 0
-	if ball.NotSeenFor == 0 {
-		seesBall = 1
-	}
-	state += seesBall * shift
-	shift *= 2
-
-	ballDir := ball.Direction
-	const halfSizeBallDir = 30.0
-	const nStatesBallDir = 5
+	const halfSizeBallDir = 180.0
+	const nStatesBallDir = 24
 	const stateSizeBallDir = 2 * halfSizeBallDir / nStatesBallDir
+	var ballDir float64
+	if seesBall == 1 {
+		ballDir = ball.Direction
+	} else {
+		ballDir = 180.0/math.Pi*math.Atan2(ball.Y-self.Y, ball.X-self.X) - self.T
+	}
 	if ballDir >= halfSizeBallDir {
-		ballDir = halfSizeBallDir - 0.01
+		ballDir -= halfSizeBallDir
 	} else if ballDir < -halfSizeBallDir {
-		ballDir = -halfSizeBallDir
+		ballDir += halfSizeBallDir
 	}
 	ballDir += halfSizeBallDir
 	ballDirState := int(ballDir / stateSizeBallDir)
@@ -53,42 +63,42 @@ func (p *Player) State() int {
 	shift *= nStatesBallDir
 
 	playerX := self.X
-	const halfSizeX = rcsscommon.FieldMaxX + 5
-	const nStatesX = 10
-	const stateSizeX = 2 * halfSizeX / nStatesX
-	if playerX > halfSizeX {
-		playerX = halfSizeX - 0.01
-	} else if playerX < -halfSizeX {
-		playerX = -halfSizeX
+	const halfSizePlayerX = rcsscommon.FieldMaxX + 5
+	const nStatesPlayerX = 10
+	const stateSizePlayerX = 2 * halfSizePlayerX / nStatesPlayerX
+	if playerX > halfSizePlayerX {
+		playerX = halfSizePlayerX - 0.01
+	} else if playerX < -halfSizePlayerX {
+		playerX = -halfSizePlayerX
 	}
-	playerX += halfSizeX
-	playerXState := int(playerX / stateSizeX)
-	if playerXState >= nStatesX {
-		playerXState = nStatesX - 1
+	playerX += halfSizePlayerX
+	playerXState := int(playerX / stateSizePlayerX)
+	if playerXState >= nStatesPlayerX {
+		playerXState = nStatesPlayerX - 1
 	} else if playerXState < 0 {
 		playerXState = 0
 	}
 	state += playerXState * shift
-	shift *= nStatesX
+	shift *= nStatesPlayerX
 
 	playerY := self.Y
-	const halfSizeY = rcsscommon.FieldMaxY + 5
-	const nStatesY = 7
-	const stateSizeY = 2 * halfSizeY / nStatesY
-	if playerY > halfSizeY {
-		playerY = halfSizeY - 0.01
-	} else if playerY < -halfSizeY {
-		playerY = -halfSizeY
+	const halfSizePlayerY = rcsscommon.FieldMaxY + 5
+	const nStatesPlayerY = 7
+	const stateSizePlayerY = 2 * halfSizePlayerY / nStatesPlayerY
+	if playerY > halfSizePlayerY {
+		playerY = halfSizePlayerY - 0.01
+	} else if playerY < -halfSizePlayerY {
+		playerY = -halfSizePlayerY
 	}
-	playerY += halfSizeY
-	playerYState := int(playerY / stateSizeY)
-	if playerYState >= nStatesY {
-		playerYState = nStatesY - 1
+	playerY += halfSizePlayerY
+	playerYState := int(playerY / stateSizePlayerY)
+	if playerYState >= nStatesPlayerY {
+		playerYState = nStatesPlayerY - 1
 	} else if playerYState < 0 {
 		playerYState = 0
 	}
 	state += playerYState * shift
-	shift *= nStatesY
+	shift *= nStatesPlayerY
 
 	playerT := self.T
 	const halfSizeT = 180.0

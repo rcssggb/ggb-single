@@ -19,9 +19,9 @@ func main() {
 	epsilon := 0.9
 	const alpha = 0.1
 	const gamma = 0.99
-	const epsilonDecay = 0.99995
+	const epsilonDecay = 0.99996
 	const alphaDecay = 0.99999
-	const nStates = 117600
+	const nStates = 564480
 	const nActions = 13
 	naiveGames := 0
 	gameCounter := 0
@@ -57,6 +57,7 @@ func main() {
 
 	returnValues := []float64{}
 	trainingStart := time.Now()
+	lastEnd := trainingStart
 	errCount := 0
 	for {
 		p, err := player.NewPlayer("single-agent", hostName)
@@ -84,7 +85,7 @@ func main() {
 		p.Client.SynchSee()
 		p.Client.ChangeView(rcsscommon.ViewWidthNarrow, rcsscommon.ViewQualityHigh)
 
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(10 * time.Millisecond)
 
 		// Initialize S
 		state := p.State()
@@ -184,8 +185,16 @@ func main() {
 		gameCounter++
 		epsilon *= epsilonDecay
 		qLearning.Alpha *= alphaDecay
-		timeSinceStart := time.Now().Sub(trainingStart)
-		log.Printf("game: %d | return: %f | total time: %s | avg time/game: %.2fs\n", gameCounter, returnValue, timeSinceStart, timeSinceStart.Seconds()/float64(gameCounter))
+
+		now := time.Now()
+		timeSinceStart := now.Sub(trainingStart)
+		gameTime := now.Sub(lastEnd)
+		lastEnd = now
+		log.Printf("game: %d | return: %f | game time: %.3fs | avg time: %.2fs\n",
+			gameCounter,
+			returnValue,
+			gameTime.Seconds(),
+			timeSinceStart.Seconds()/float64(gameCounter))
 
 		// Write return at the end of episode
 		returnValues = append(returnValues, returnValue)
@@ -209,7 +218,9 @@ func main() {
 
 			file.Close()
 			log.Printf("return history saved after %d games\n", gameCounter)
-			log.Printf("current parameters\n alpha = %f\n epsilon = %f\n", qLearning.Alpha, epsilon)
+			log.Printf("training time = %s\n", timeSinceStart)
+			log.Printf("alpha = %f\n", qLearning.Alpha)
+			log.Printf("epsilon = %f\n", epsilon)
 
 		}
 		time.Sleep(1300 * time.Millisecond)
