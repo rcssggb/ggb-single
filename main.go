@@ -13,15 +13,17 @@ import (
 	"github.com/rcssggb/ggb-lib/trainerclient"
 	"github.com/rcssggb/ggb-single/player"
 	q "github.com/rcssggb/ggb-single/qlearning"
+	"gorgonia.org/tensor"
 )
 
 func main() {
-	epsilon := 0.0
+	epsilon := 0.3
 	const alpha = float32(1)
 	const epsilonDecay = 0.999
 	naiveGames := 0
 	gameCounter := 0
-	weightsFile := "weights.rln"
+	weightsFileA := "weightsA.rln"
+	weightsFileB := "weightsB.rln"
 	returnsFile := "./data/returns.rln"
 
 	logName := time.Now().String() + ".log"
@@ -38,18 +40,30 @@ func main() {
 
 	hostName := "rcssserver"
 
-	var qLearning *q.QLearning
+	var qLearningA, qLearningB *q.QLearning
 
-	_, err = os.Stat(weightsFile)
+	_, err = os.Stat(weightsFileA)
 	if os.IsNotExist(err) {
 		log.Println("creating new agent")
-		qLearning, err = q.Init()
+		qLearningA, err = q.Init()
 		if err != nil {
 			panic(err)
 		}
 	} else {
-		log.Printf("loading agent from %s\n", weightsFile)
-		qLearning, err = q.Load(weightsFile)
+		log.Printf("loading agent from %s\n", weightsFileA)
+		qLearningA, err = q.Load(weightsFileA)
+	}
+
+	_, err = os.Stat(weightsFileB)
+	if os.IsNotExist(err) {
+		log.Println("creating new agent")
+		qLearningB, err = q.Init()
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		log.Printf("loading agent from %s\n", weightsFileB)
+		qLearningB, err = q.Load(weightsFileB)
 	}
 
 	returnValues := []float32{}
@@ -92,7 +106,21 @@ func main() {
 			}
 
 			// Choose A from S using policy derived from Q (e.g., epsilon-greedy)
-			qValues, err := qLearning.ActionValues(state)
+			qValuesA, err := qLearningA.ActionValues(state)
+			if err != nil {
+				p.Client.Log(err)
+			}
+			qValuesB, err := qLearningB.ActionValues(state)
+			if err != nil {
+				p.Client.Log(err)
+			}
+
+			var qValues *tensor.Dense
+			qSum, err := qValuesA.Add(qValuesB)
+			if err != nil {
+				p.Client.Log(err)
+			}
+			qValues, err = qSum.DivScalar(float32(2.0), true)
 			if err != nil {
 				p.Client.Log(err)
 			}
@@ -158,39 +186,70 @@ func main() {
 			returnValue += r
 
 			// Update Q towards target
-			nextActionValues, err := qLearning.ActionValues(state)
+			nextActionValuesA, err := qLearningA.ActionValues(state)
 			if err != nil {
 				p.Client.Log(err)
 			}
-			maxActionCoord, err := nextActionValues.Argmax(1)
+			nextActionValuesB, err := qLearningB.ActionValues(state)
 			if err != nil {
 				p.Client.Log(err)
 			}
-			maxActionCoordVal := maxActionCoord.Data().([]int)[0]
-			nextMax := nextActionValues.Get(maxActionCoordVal)
-			if err != nil {
-				p.Client.Log(err)
-			}
-			nextMaxVal := nextMax.(float32)
-			if math.IsNaN(float64(nextMaxVal)) {
-				panic("training diverged")
-			}
-			td := r
-			if p.Client.PlayMode() != rcsscommon.PlayModeTimeOver {
-				td += nextMaxVal
-			}
-			currentQ := qValues.Get(action)
-			currentQVal := currentQ.(float32)
-			qValues.Set(action, currentQVal+alpha*(td-currentQVal))
-			err = qLearning.UpdateWithBatch(state, qValues)
-			if err != nil {
-				p.Client.Log(err)
+			if rand.Float32() < 0.5 {
+				maxActionCoord, err := nextActionValuesA.Argmax(1)
+				if err != nil {
+					p.Client.Log(err)
+				}
+				maxActionCoordVal := maxActionCoord.Data().([]int)[0]
+				nextMax := nextActionValuesB.Get(maxActionCoordVal)
+				if err != nil {
+					p.Client.Log(err)
+				}
+				nextMaxVal := nextMax.(float32)
+				if math.IsNaN(float64(nextMaxVal)) {
+					panic("training diverged")
+				}
+				td := r
+				if p.Client.PlayMode() != rcsscommon.PlayModeTimeOver {
+					td += nextMaxVal
+				}
+				currentQ := qValuesA.Get(action)
+				currentQVal := currentQ.(float32)
+				qValuesA.Set(action, currentQVal+alpha*(td-currentQVal))
+				err = qLearningA.UpdateWithBatch(state, qValuesA)
+				if err != nil {
+					p.Client.Log(err)
+				}
+			} else {
+				maxActionCoord, err := nextActionValuesB.Argmax(1)
+				if err != nil {
+					p.Client.Log(err)
+				}
+				maxActionCoordVal := maxActionCoord.Data().([]int)[0]
+				nextMax := nextActionValuesA.Get(maxActionCoordVal)
+				if err != nil {
+					p.Client.Log(err)
+				}
+				nextMaxVal := nextMax.(float32)
+				if math.IsNaN(float64(nextMaxVal)) {
+					panic("training diverged")
+				}
+				td := r
+				if p.Client.PlayMode() != rcsscommon.PlayModeTimeOver {
+					td += nextMaxVal
+				}
+				currentQ := qValuesB.Get(action)
+				currentQVal := currentQ.(float32)
+				qValuesB.Set(action, currentQVal+alpha*(td-currentQVal))
+				err = qLearningB.UpdateWithBatch(state, qValuesB)
+				if err != nil {
+					p.Client.Log(err)
+				}
 			}
 
 			// S <- S'
 			state = nextState
+			epsilon = epsilon * epsilonDecay
 		}
-		epsilon = epsilon * epsilonDecay
 		if naiveGames > 0 {
 			naiveGames--
 		}
@@ -202,7 +261,11 @@ func main() {
 		returnValues = append(returnValues, returnValue)
 
 		if gameCounter%10 == 0 {
-			err = qLearning.Save(weightsFile)
+			err = qLearningA.Save(weightsFileA)
+			if err != nil {
+				log.Println(err)
+			}
+			err = qLearningB.Save(weightsFileB)
 			if err != nil {
 				log.Println(err)
 			}
