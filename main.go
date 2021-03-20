@@ -248,8 +248,8 @@ func main() {
 
 			// S <- S'
 			state = nextState
-			epsilon = epsilon * epsilonDecay
 		}
+		epsilon = epsilon * epsilonDecay
 		if naiveGames > 0 {
 			naiveGames--
 		}
