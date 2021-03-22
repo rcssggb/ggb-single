@@ -34,20 +34,25 @@ func Init() (*QLearning, error) {
 		return nil, err
 	}
 
-	xShape := []int{1, 13}
+	xShape := []int{1, 6}
 	yShape := []int{1, 4}
 	in := m.NewInput("state", xShape)
 	out := m.NewInput("actionValue", yShape)
 
 	qModel.AddLayers(
-		layer.FC{Input: in.Squeeze()[0], Output: 256, Init: gorgonia.GlorotN(0.001), BiasInit: gorgonia.GlorotN(0.001)},
+		layer.FC{Input: in.Squeeze()[0], Output: 1024, Init: gorgonia.GlorotN(0.001), BiasInit: gorgonia.GlorotN(0.001)},
+		layer.FC{Input: 1024, Output: 512, Init: gorgonia.GlorotN(0.001), BiasInit: gorgonia.GlorotN(0.001)},
+		layer.FC{Input: 512, Output: 512, Init: gorgonia.GlorotN(0.001), BiasInit: gorgonia.GlorotN(0.001)},
+		layer.FC{Input: 512, Output: 512, Init: gorgonia.GlorotN(0.001), BiasInit: gorgonia.GlorotN(0.001)},
+		layer.FC{Input: 512, Output: 256, Init: gorgonia.GlorotN(0.001), BiasInit: gorgonia.GlorotN(0.001)},
+		layer.FC{Input: 256, Output: 256, Init: gorgonia.GlorotN(0.001), BiasInit: gorgonia.GlorotN(0.001)},
+		layer.FC{Input: 256, Output: 256, Init: gorgonia.GlorotN(0.001), BiasInit: gorgonia.GlorotN(0.001)},
 		layer.FC{Input: 256, Output: 128, Init: gorgonia.GlorotN(0.001), BiasInit: gorgonia.GlorotN(0.001)},
 		layer.FC{Input: 128, Output: 64, Init: gorgonia.GlorotN(0.001), BiasInit: gorgonia.GlorotN(0.001)},
 		layer.FC{Input: 64, Output: 32, Init: gorgonia.GlorotN(0.001), BiasInit: gorgonia.GlorotN(0.001)},
-		layer.FC{Input: 32, Output: 32, Init: gorgonia.GlorotN(0.001), BiasInit: gorgonia.GlorotN(0.001)},
-		layer.FC{Input: 32, Output: out.Squeeze()[0], Activation: layer.Linear, Init: gorgonia.GlorotN(0.001), BiasInit: gorgonia.GlorotN(0.001)},
+		layer.FC{Input: 32, Output: 16, Init: gorgonia.GlorotN(0.001), BiasInit: gorgonia.GlorotN(0.001)},
+		layer.FC{Input: 16, Output: out.Squeeze()[0], Activation: layer.Linear, Init: gorgonia.GlorotN(0.001), BiasInit: gorgonia.GlorotN(0.001)},
 	)
-
 	err = qModel.Compile(in, out,
 		m.WithBatchSize(q.batchSize),
 		m.WithOptimizer(

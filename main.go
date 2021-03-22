@@ -16,7 +16,7 @@ import (
 )
 
 func main() {
-	epsilon := 0.0
+	epsilon := 0.5
 	const alpha = float32(1)
 	const epsilonDecay = 0.999
 	naiveGames := 0
