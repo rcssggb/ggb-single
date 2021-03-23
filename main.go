@@ -199,7 +199,7 @@ func main() {
 		// Write return at the end of episode
 		returnValues = append(returnValues, returnValue)
 
-		if gameCounter%50 == 0 {
+		if gameCounter%100 == 0 {
 			err = qLearning.Save(qTableFile)
 			if err != nil {
 				log.Println(err)

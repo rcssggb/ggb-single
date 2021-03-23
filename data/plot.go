@@ -27,7 +27,7 @@ func main() {
 		return
 	}
 
-	const windowSize = 50
+	const windowSize = 100
 	var returnMeans []float64
 	var acc float64
 	k := 0
@@ -51,7 +51,7 @@ func main() {
 
 	plotReturns.SavePlot("plotReturns.png")
 
-	// Plot avg return per windowSize (default 50) episodes
+	// Plot avg return per windowSize (default 100) episodes
 	plotMeanReturns, _ := glot.NewPlot(1, false, false)
 
 	plotMeanReturns.SetTitle(fmt.Sprintf("Avg Return per %d Episodes", windowSize))
