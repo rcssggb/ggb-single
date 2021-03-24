@@ -84,7 +84,7 @@ func main() {
 		t.Start()
 		lastGoalTime := -1
 		currentTime := 0
-		returnValue := float64(0)
+		returnValue := float32(0)
 		for {
 			if p.Client.PlayMode() == rcsscommon.PlayModeTimeOver {
 				p.Client.Log(p.Client.Bye())
@@ -155,15 +155,15 @@ func main() {
 			// 	p.Client.Log("goal against, bad!")
 			// }
 
-			r := float64(0)
+			r := float32(0)
 
 			ppos := t.GlobalPositions().Teams["single-agent"][1]
 			bpos := t.GlobalPositions().Ball
 
 			distToBall := math.Sqrt(math.Pow(bpos.X-ppos.X, 2) + math.Pow(bpos.Y-ppos.Y, 2))
-			r += -distToBall * 0.001 / 6000.0
+			r += -float32(distToBall) * 0.001 / 6000.0
 
-			r += bpos.DeltaX / 6000.0
+			r += float32(bpos.DeltaX) / 6000.0
 
 			// gx, gy := rcsscommon.FlagRightGoal.Position()
 			// r += -math.Sqrt(math.Pow(bpos.X-gx, 2)+math.Pow(bpos.Y-gy, 2)) / gx * 0.0001
