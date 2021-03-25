@@ -128,53 +128,29 @@ func main() {
 			p.WaitCycle()
 
 			// Observe R, S'
+			lastTime := currentTime
+			currentTime = p.Client.Time()
+
+			// Wait until simulation cycle changes (1 action per simulation cycle)
+			for currentTime == lastTime {
+				t.DoneSynch()
+				p.WaitCycle()
+				lastTime = currentTime
+				currentTime = p.Client.Time()
+			}
+
 			nextState := q.Slice2Tensor(p.State())
 			currentTime = p.Client.Time()
-			// r := float32(0)
-
-			// // r = float32(math.Abs(t.GlobalPositions().Teams["single-agent"][1].BodyAngle)/90.0 - 1.0)
-
-			// // if ball.NotSeenFor == 0 {
-			// // 	ballDist := float32(ball.Distance)
-			// // 	if ballDist < 0.7 {
-			// // 		ballDist = 0.7
-			// // 		epsilon *= epsilonDecay
-			// // 	}
-			// // 	r = 1.0 / ballDist
-			// // }
-
-			// if p.Client.PlayMode() == rcsscommon.PlayModeGoalL && currentTime > lastGoalTime {
-			// 	lastGoalTime = currentTime
-			// 	r = 1
-			// 	p.Client.Log("goal!")
-			// }
-
-			// if p.Client.PlayMode() == rcsscommon.PlayModeGoalR && currentTime > lastGoalTime {
-			// 	lastGoalTime = currentTime
-			// 	r = -1
-			// 	p.Client.Log("goal against, bad!")
-			// }
-
 			r := float32(0)
 
-			ppos := t.GlobalPositions().Teams["single-agent"][1]
-			bpos := t.GlobalPositions().Ball
-
-			distToBall := math.Sqrt(math.Pow(bpos.X-ppos.X, 2) + math.Pow(bpos.Y-ppos.Y, 2))
-			r += -float32(distToBall) * 0.001 / 6000.0
-
-			r += float32(bpos.DeltaX) / 6000.0
-
-			// gx, gy := rcsscommon.FlagRightGoal.Position()
-			// r += -math.Sqrt(math.Pow(bpos.X-gx, 2)+math.Pow(bpos.Y-gy, 2)) / gx * 0.0001
-
-			if currentTime > lastGoalTime {
+			if p.Client.PlayMode() == rcsscommon.PlayModeGoalL && currentTime > lastGoalTime {
 				lastGoalTime = currentTime
-				if p.Client.PlayMode() == rcsscommon.PlayModeGoalL {
-					r += 1.0
-				} else if p.Client.PlayMode() == rcsscommon.PlayModeGoalR {
-					r += -1.0
-				}
+				r = 1
+				p.Client.Log("goal!")
+			} else if p.Client.PlayMode() == rcsscommon.PlayModeGoalR && currentTime > lastGoalTime {
+				lastGoalTime = currentTime
+				r = -1
+				p.Client.Log("goal against, bad!")
 			}
 
 			returnValue += r
@@ -204,7 +180,13 @@ func main() {
 			currentQ := qValues.Get(action)
 			currentQVal := currentQ.(float32)
 			qValues.Set(action, currentQVal+alpha*(td-currentQVal))
-			err = qLearning.UpdateWithBatch(state, qValues)
+
+			isTerminal := false
+			if currentTime == 6000 {
+				isTerminal = true
+			}
+
+			err = qLearning.UpdateWithBatch(state, qValues, isTerminal)
 			if err != nil {
 				p.Client.Log(err)
 			}

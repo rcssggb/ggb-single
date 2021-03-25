@@ -25,7 +25,7 @@ type QLearning struct {
 // a discrete policy
 func Init() (*QLearning, error) {
 	q := QLearning{}
-	q.batchSize = 64
+	q.batchSize = 6000
 	q.batchStates = []*tensor.Dense{}
 	q.batchTargets = []*tensor.Dense{}
 
@@ -93,10 +93,11 @@ func (q *QLearning) Update(state, target *tensor.Dense) error {
 }
 
 // UpdateWithBatch updates learnables from state towards target
-func (q *QLearning) UpdateWithBatch(state, target *tensor.Dense) error {
+func (q *QLearning) UpdateWithBatch(state, target *tensor.Dense, isTerminal bool) error {
 	q.batchStates = append(q.batchStates, state)
 	q.batchTargets = append(q.batchTargets, target)
-	if len(q.batchStates) >= q.batchSize {
+	if isTerminal {
+		fmt.Println("Fitting...")
 		states, err := q.batchStates[0].Concat(0, q.batchStates[1:]...)
 		if err != nil {
 			return err
