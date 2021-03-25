@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/gob"
 	"log"
-	"math"
 	"math/rand"
 	"os"
 	"path"
@@ -85,34 +84,36 @@ func main() {
 		lastGoalTime := -1
 		currentTime := 0
 		returnValue := float32(0)
+
+		// Choose A from S using policy derived from Q (e.g., epsilon-greedy)
+		qValues, err := qLearning.ActionValues(state)
+		if err != nil {
+			p.Client.Log(err)
+		}
+
+		var action int
+		takeRandomAction := rand.Float64() < epsilon
+		if takeRandomAction {
+			action = rand.Intn(4)
+		} else {
+			if naiveGames > 0 {
+				action = p.NaiveBehaviorPolicy()
+			} else {
+				maxActionTensor, err := qValues.Argmax(1)
+				if err != nil {
+					p.Client.Log(err)
+				}
+				action = maxActionTensor.Data().([]int)[0]
+			}
+		}
+
 		for {
 			if p.Client.PlayMode() == rcsscommon.PlayModeTimeOver {
 				p.Client.Log(p.Client.Bye())
 				break
 			}
 
-			// Choose A from S using policy derived from Q (e.g., epsilon-greedy)
-			qValues, err := qLearning.ActionValues(state)
-			if err != nil {
-				p.Client.Log(err)
-			}
-
-			var action int
-			takeRandomAction := rand.Float64() < epsilon
-			if takeRandomAction {
-				action = rand.Intn(4)
-			} else {
-				if naiveGames > 0 {
-					action = p.NaiveBehaviorPolicy()
-				} else {
-					maxActionTensor, err := qValues.Argmax(1)
-					if err != nil {
-						p.Client.Log(err)
-					}
-					action = maxActionTensor.Data().([]int)[0]
-				}
-			}
-
+			// Take action A
 			p.ExecuteBehavior(action)
 
 			err = p.Client.Error()
@@ -139,10 +140,12 @@ func main() {
 				currentTime = p.Client.Time()
 			}
 
+			// Observe S'
 			nextState := q.Slice2Tensor(p.State())
 			currentTime = p.Client.Time()
 			r := float32(0)
 
+			// Observe R
 			if p.Client.PlayMode() == rcsscommon.PlayModeGoalL && currentTime > lastGoalTime {
 				lastGoalTime = currentTime
 				r = 1
@@ -155,44 +158,69 @@ func main() {
 
 			returnValue += r
 
+			// Choose A' from S' using policy derived from Q (e.g., epsilon-greedy)
+			nextQValues, err := qLearning.ActionValues(nextState)
+			if err != nil {
+				p.Client.Log(err)
+			}
+			var nextAction int
+			takeRandomAction := rand.Float64() < epsilon
+			if takeRandomAction {
+				nextAction = rand.Intn(4)
+			} else {
+				if naiveGames > 0 {
+					action = p.NaiveBehaviorPolicy()
+				} else {
+					maxActionTensor, err := nextQValues.Argmax(1)
+					if err != nil {
+						p.Client.Log(err)
+					}
+					nextAction = maxActionTensor.Data().([]int)[0]
+				}
+			}
+
+			// // Check if training diverged
+			// nextActionValues, err := qLearning.ActionValues(state)
+			// if err != nil {
+			// 	p.Client.Log(err)
+			// }
+			// maxActionCoord, err := nextActionValues.Argmax(1)
+			// if err != nil {
+			// 	p.Client.Log(err)
+			// }
+			// maxActionCoordVal := maxActionCoord.Data().([]int)[0]
+			// nextMax := nextActionValues.Get(maxActionCoordVal)
+			// if err != nil {
+			// 	p.Client.Log(err)
+			// }
+			// nextMaxVal := nextMax.(float32)
+			// if math.IsNaN(float64(nextMaxVal)) {
+			// 	panic("training diverged")
+			// }
+
 			// Update Q towards target
-			nextActionValues, err := qLearning.ActionValues(state)
-			if err != nil {
-				p.Client.Log(err)
-			}
-			maxActionCoord, err := nextActionValues.Argmax(1)
-			if err != nil {
-				p.Client.Log(err)
-			}
-			maxActionCoordVal := maxActionCoord.Data().([]int)[0]
-			nextMax := nextActionValues.Get(maxActionCoordVal)
-			if err != nil {
-				p.Client.Log(err)
-			}
-			nextMaxVal := nextMax.(float32)
-			if math.IsNaN(float64(nextMaxVal)) {
-				panic("training diverged")
-			}
-			td := r
-			if p.Client.PlayMode() != rcsscommon.PlayModeTimeOver {
-				td += nextMaxVal
-			}
 			currentQ := qValues.Get(action)
 			currentQVal := currentQ.(float32)
-			qValues.Set(action, currentQVal+alpha*(td-currentQVal))
 
-			isTerminal := false
-			if currentTime == 6000 {
-				isTerminal = true
+			nextQ := qValues.Get(nextAction)
+			nextQVal := nextQ.(float32)
+
+			td := r
+			if p.Client.PlayMode() != rcsscommon.PlayModeTimeOver {
+				td += nextQVal
 			}
 
-			err = qLearning.UpdateWithBatch(state, qValues, isTerminal)
+			qValues.Set(action, currentQVal+alpha*(td-currentQVal))
+
+			err = qLearning.UpdateWithBatch(state, qValues)
 			if err != nil {
 				p.Client.Log(err)
 			}
 
 			// S <- S'
+			// A <- A'
 			state = nextState
+			action = nextAction
 		}
 		epsilon = epsilon * epsilonDecay
 		if naiveGames > 0 {

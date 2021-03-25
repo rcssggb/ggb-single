@@ -25,7 +25,7 @@ type QLearning struct {
 // a discrete policy
 func Init() (*QLearning, error) {
 	q := QLearning{}
-	q.batchSize = 6000
+	q.batchSize = 256
 	q.batchStates = []*tensor.Dense{}
 	q.batchTargets = []*tensor.Dense{}
 
@@ -40,9 +40,8 @@ func Init() (*QLearning, error) {
 	out := m.NewInput("actionValue", yShape)
 
 	qModel.AddLayers(
-		layer.FC{Input: in.Squeeze()[0], Output: 1024, Init: gorgonia.GlorotN(0.001), BiasInit: gorgonia.GlorotN(0.001)},
-		layer.FC{Input: 1024, Output: 512, Init: gorgonia.GlorotN(0.001), BiasInit: gorgonia.GlorotN(0.001)},
-		layer.FC{Input: 512, Output: 256, Init: gorgonia.GlorotN(0.001), BiasInit: gorgonia.GlorotN(0.001)},
+		layer.FC{Input: in.Squeeze()[0], Output: 256, Init: gorgonia.GlorotN(0.001), BiasInit: gorgonia.GlorotN(0.001)},
+		layer.FC{Input: 256, Output: 256, Init: gorgonia.GlorotN(0.001), BiasInit: gorgonia.GlorotN(0.001)},
 		layer.FC{Input: 256, Output: 128, Init: gorgonia.GlorotN(0.001), BiasInit: gorgonia.GlorotN(0.001)},
 		layer.FC{Input: 128, Output: 64, Init: gorgonia.GlorotN(0.001), BiasInit: gorgonia.GlorotN(0.001)},
 		layer.FC{Input: 64, Output: 32, Init: gorgonia.GlorotN(0.001), BiasInit: gorgonia.GlorotN(0.001)},
@@ -93,11 +92,10 @@ func (q *QLearning) Update(state, target *tensor.Dense) error {
 }
 
 // UpdateWithBatch updates learnables from state towards target
-func (q *QLearning) UpdateWithBatch(state, target *tensor.Dense, isTerminal bool) error {
+func (q *QLearning) UpdateWithBatch(state, target *tensor.Dense) error {
 	q.batchStates = append(q.batchStates, state)
 	q.batchTargets = append(q.batchTargets, target)
-	if isTerminal {
-		fmt.Println("Fitting...")
+	if len(q.batchStates) >= q.batchSize {
 		states, err := q.batchStates[0].Concat(0, q.batchStates[1:]...)
 		if err != nil {
 			return err
