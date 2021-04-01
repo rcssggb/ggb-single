@@ -21,7 +21,7 @@ func main() {
 	const gamma = 0.99
 	const epsilonDecay = 0.99996
 	const alphaDecay = 0.99999
-	const nStates = 564480
+	const nStates = 282240
 	const nActions = 13
 	naiveGames := 0
 	gameCounter := 0

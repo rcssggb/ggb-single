@@ -11,15 +11,13 @@ func (p *Player) State() int {
 	self := p.GetSelfData()
 	ball := p.GetBall()
 
-	seesBall := 0
+	seesBall := false
 	if ball.NotSeenFor == 0 {
-		seesBall = 1
+		seesBall = true
 	}
-	state := seesBall
-	shift := 2
 
 	var ballDist float64
-	if seesBall == 1 {
+	if seesBall {
 		ballDist = ball.Distance
 	} else {
 		ballDist = math.Sqrt(math.Pow(ball.X-self.X, 2) + math.Pow(ball.Y-self.Y, 2))
@@ -35,14 +33,14 @@ func (p *Player) State() int {
 	} else if ballDistState < 0 {
 		ballDistState = 0
 	}
-	state += ballDistState * shift
-	shift *= 7
+	state := ballDistState
+	shift := 7
 
 	const halfSizeBallDir = 180.0
 	const nStatesBallDir = 24
 	const stateSizeBallDir = 2 * halfSizeBallDir / nStatesBallDir
 	var ballDir float64
-	if seesBall == 1 {
+	if seesBall {
 		ballDir = ball.Direction
 	} else {
 		ballDir = 180.0/math.Pi*math.Atan2(ball.Y-self.Y, ball.X-self.X) - self.T
