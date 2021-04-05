@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/gob"
 	"log"
+	"math"
 	"math/rand"
 	"os"
 	"path"
@@ -15,9 +16,9 @@ import (
 )
 
 func main() {
-	epsilon := 0.5
+	epsilon := 0.3
 	const alpha = float32(1)
-	const epsilonDecay = 0.999
+	const epsilonDecay = 0.996
 	naiveGames := 0
 	gameCounter := 0
 	weightsFile := "weights.rln"
@@ -81,7 +82,7 @@ func main() {
 		}
 		t.MovePlayer("single-agent", 1, startX, startY, 0, 0, 0)
 		t.Start()
-		lastGoalTime := -1
+		// lastGoalTime := -1
 		currentTime := 0
 		returnValue := float32(0)
 
@@ -94,7 +95,7 @@ func main() {
 		var action int
 		takeRandomAction := rand.Float64() < epsilon
 		if takeRandomAction {
-			action = rand.Intn(4)
+			action = rand.Intn(5)
 		} else {
 			if naiveGames > 0 {
 				action = p.NaiveBehaviorPolicy()
@@ -146,15 +147,18 @@ func main() {
 			r := float32(0)
 
 			// Observe R
-			if p.Client.PlayMode() == rcsscommon.PlayModeGoalL && currentTime > lastGoalTime {
-				lastGoalTime = currentTime
-				r = 1
-				p.Client.Log("goal!")
-			} else if p.Client.PlayMode() == rcsscommon.PlayModeGoalR && currentTime > lastGoalTime {
-				lastGoalTime = currentTime
-				r = -1
-				p.Client.Log("goal against, bad!")
-			}
+			ball := p.GetBall()
+			r += 0.7 / float32(ball.Distance)
+
+			// if p.Client.PlayMode() == rcsscommon.PlayModeGoalL && currentTime > lastGoalTime {
+			// 	lastGoalTime = currentTime
+			// 	r = 1
+			// 	p.Client.Log("goal!")
+			// } else if p.Client.PlayMode() == rcsscommon.PlayModeGoalR && currentTime > lastGoalTime {
+			// 	lastGoalTime = currentTime
+			// 	r = -1
+			// 	p.Client.Log("goal against, bad!")
+			// }
 
 			returnValue += r
 
@@ -166,7 +170,7 @@ func main() {
 			var nextAction int
 			takeRandomAction := rand.Float64() < epsilon
 			if takeRandomAction {
-				nextAction = rand.Intn(4)
+				nextAction = rand.Intn(5)
 			} else {
 				if naiveGames > 0 {
 					action = p.NaiveBehaviorPolicy()
@@ -179,24 +183,24 @@ func main() {
 				}
 			}
 
-			// // Check if training diverged
-			// nextActionValues, err := qLearning.ActionValues(state)
-			// if err != nil {
-			// 	p.Client.Log(err)
-			// }
-			// maxActionCoord, err := nextActionValues.Argmax(1)
-			// if err != nil {
-			// 	p.Client.Log(err)
-			// }
-			// maxActionCoordVal := maxActionCoord.Data().([]int)[0]
-			// nextMax := nextActionValues.Get(maxActionCoordVal)
-			// if err != nil {
-			// 	p.Client.Log(err)
-			// }
-			// nextMaxVal := nextMax.(float32)
-			// if math.IsNaN(float64(nextMaxVal)) {
-			// 	panic("training diverged")
-			// }
+			// Check if training diverged
+			nextActionValues, err := qLearning.ActionValues(state)
+			if err != nil {
+				p.Client.Log(err)
+			}
+			maxActionCoord, err := nextActionValues.Argmax(1)
+			if err != nil {
+				p.Client.Log(err)
+			}
+			maxActionCoordVal := maxActionCoord.Data().([]int)[0]
+			nextMax := nextActionValues.Get(maxActionCoordVal)
+			if err != nil {
+				p.Client.Log(err)
+			}
+			nextMaxVal := nextMax.(float32)
+			if math.IsNaN(float64(nextMaxVal)) {
+				panic("training diverged")
+			}
 
 			// Update Q towards target
 			currentQ := qValues.Get(action)
