@@ -7,16 +7,18 @@ func (p *Player) ExecuteBehavior(b int) string {
 	case 0:
 		return ""
 	case 1:
-		return p.bhvLocateBall()
-	case 2:
-		return p.bhvLeadBallRight()
-	case 3:
-		return p.bhvShootToGoalR()
-	case 4:
 		return p.bhvWalkToBall()
+	case 2:
+		return p.bhvWalkAwayFromBall()
+	case 3:
+		return p.bhvLocateBall()
+	case 4:
+		return p.bhvLeadBallRight()
 	case 5:
-		return p.bhvLeadBallLeft()
+		return p.bhvShootToGoalR()
 	case 6:
+		return p.bhvLeadBallLeft()
+	case 7:
 		return p.bhvShootToGoalL()
 	}
 	return "(error invalid behavior index)"

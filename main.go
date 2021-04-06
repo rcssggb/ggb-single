@@ -16,9 +16,9 @@ import (
 )
 
 func main() {
-	epsilon := 0.3
+	epsilon := 0.5
 	const alpha = float32(1)
-	const epsilonDecay = 0.996
+	const epsilonDecay = 0.997
 	naiveGames := 0
 	gameCounter := 0
 	weightsFile := "weights.rln"
@@ -82,7 +82,7 @@ func main() {
 		}
 		t.MovePlayer("single-agent", 1, startX, startY, 0, 0, 0)
 		t.Start()
-		// lastGoalTime := -1
+		lastGoalTime := -1
 		currentTime := 0
 		returnValue := float32(0)
 
@@ -95,7 +95,7 @@ func main() {
 		var action int
 		takeRandomAction := rand.Float64() < epsilon
 		if takeRandomAction {
-			action = rand.Intn(5)
+			action = rand.Intn(8)
 		} else {
 			if naiveGames > 0 {
 				action = p.NaiveBehaviorPolicy()
@@ -147,18 +147,22 @@ func main() {
 			r := float32(0)
 
 			// Observe R
-			ball := p.GetBall()
-			r += 0.7 / float32(ball.Distance)
-
-			// if p.Client.PlayMode() == rcsscommon.PlayModeGoalL && currentTime > lastGoalTime {
-			// 	lastGoalTime = currentTime
-			// 	r = 1
-			// 	p.Client.Log("goal!")
-			// } else if p.Client.PlayMode() == rcsscommon.PlayModeGoalR && currentTime > lastGoalTime {
-			// 	lastGoalTime = currentTime
-			// 	r = -1
-			// 	p.Client.Log("goal against, bad!")
+			// ball := p.GetBall()
+			// if ball.NotSeenFor > 0 {
+			// 	r -= 0.01
+			// } else {
+			// 	r -= float32(ball.Distance) * 0.001 / 6000
 			// }
+
+			if p.Client.PlayMode() == rcsscommon.PlayModeGoalL && currentTime > lastGoalTime {
+				lastGoalTime = currentTime
+				r = 1
+				p.Client.Log("goal!")
+			} else if p.Client.PlayMode() == rcsscommon.PlayModeGoalR && currentTime > lastGoalTime {
+				lastGoalTime = currentTime
+				r = -1
+				p.Client.Log("goal against, bad!")
+			}
 
 			returnValue += r
 
@@ -170,7 +174,7 @@ func main() {
 			var nextAction int
 			takeRandomAction := rand.Float64() < epsilon
 			if takeRandomAction {
-				nextAction = rand.Intn(5)
+				nextAction = rand.Intn(8)
 			} else {
 				if naiveGames > 0 {
 					action = p.NaiveBehaviorPolicy()
