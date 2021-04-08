@@ -85,17 +85,17 @@ func (p *Player) NaiveBehaviorPolicy() int {
 	if ball.NotSeenFor == 0 {
 		if body.X > 40 && ball.Distance < 0.7 {
 			// Shoot ball
-			action = 2
+			action = 5
 		} else if ball.Distance < 0.7 {
 			// Lead ball
-			action = 1
+			action = 4
 		} else {
 			// Walk to ball
-			action = 3
+			action = 1
 		}
 	} else {
 		// Locate ball
-		action = 0
+		action = 3
 	}
 	return action
 }
