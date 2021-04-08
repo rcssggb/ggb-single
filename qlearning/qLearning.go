@@ -50,11 +50,11 @@ func Init() (*QLearning, error) {
 	)
 	err = qModel.Compile(in, out,
 		m.WithBatchSize(q.batchSize),
-		// m.WithOptimizer(
-		// 	gorgonia.NewVanillaSolver(
-		// 		gorgonia.WithLearnRate(1),
-		// 	),
-		// ),
+		m.WithOptimizer(
+			gorgonia.NewVanillaSolver(
+				gorgonia.WithLearnRate(1),
+			),
+		),
 	)
 	if err != nil {
 		return nil, err

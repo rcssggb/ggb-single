@@ -16,10 +16,10 @@ import (
 )
 
 func main() {
-	epsilon := 0.5
+	epsilon := 0.1
 	const alpha = float32(1)
-	const epsilonDecay = 0.997
-	naiveGames := 0
+	const epsilonDecay = 0.999
+	naiveGames := 2000
 	gameCounter := 0
 	weightsFile := "weights.rln"
 	returnsFile := "./data/returns.rln"
@@ -246,6 +246,7 @@ func main() {
 			if err != nil {
 				log.Println(err)
 			}
+			log.Printf("current epsilon = %f\n", epsilon)
 			log.Printf("weights saved after %d games\n", gameCounter)
 			if gameCounter%50 == 0 {
 				file, err := os.Create(returnsFile)
