@@ -51,11 +51,31 @@ func main() {
 	} else {
 		log.Printf("loading agent from %s\n", qTableFile)
 		qLearning, err = q.Load(qTableFile)
+		if err != nil {
+			panic(err)
+		}
 	}
 	qLearning.Gamma = gamma
 	qLearning.Alpha = alpha
 
+	_, err = os.Stat(returnsFile)
 	returnValues := []float64{}
+	if os.IsNotExist(err) {
+		log.Println("creating new returns file")
+	} else {
+		log.Printf("loading return history from %s\n", returnsFile)
+		f, err := os.Open(returnsFile)
+		if err != nil {
+			panic(err)
+		}
+
+		dec := gob.NewDecoder(f)
+		err = dec.Decode(&returnValues)
+		if err != nil {
+			panic(err)
+		}
+		f.Close()
+	}
 	trainingStart := time.Now()
 	lastEnd := trainingStart
 	errCount := 0
@@ -223,6 +243,6 @@ func main() {
 			log.Printf("epsilon = %f\n", epsilon)
 
 		}
-		time.Sleep(1300 * time.Millisecond)
+		time.Sleep(1400 * time.Millisecond)
 	}
 }
