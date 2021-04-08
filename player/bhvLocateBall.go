@@ -21,6 +21,7 @@ func (p *Player) bhvLocateBall() string {
 			}
 		}
 		cmd += p.Client.Turn(amountToTurn)
+		cmd += p.Client.Dash(5, 0)
 	} else {
 		ballAngle := ball.Direction
 		amountToTurn := ballAngle / 5

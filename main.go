@@ -177,7 +177,7 @@ func main() {
 				nextAction = rand.Intn(8)
 			} else {
 				if naiveGames > 0 {
-					action = p.NaiveBehaviorPolicy()
+					nextAction = p.NaiveBehaviorPolicy()
 				} else {
 					maxActionTensor, err := nextQValues.Argmax(1)
 					if err != nil {
