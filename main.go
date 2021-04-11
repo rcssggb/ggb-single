@@ -16,9 +16,10 @@ import (
 )
 
 func main() {
-	epsilon := 0.5
-	const alpha = float32(1)
-	const epsilonDecay = 0.999
+	epsilon := 0.7
+	const K = float32(1)
+	const gamma = float32(0.99)
+	const epsilonDecay = 0.997
 	naiveGames := 0
 	gameCounter := 0
 	weightsFile := "weights.rln"
@@ -34,7 +35,7 @@ func main() {
 	log.SetOutput(file)
 	log.SetFlags(log.Lmicroseconds | log.Lshortfile)
 
-	log.Printf("starting training with // epsilon = %f // alpha = %f // epsilonDecay = %f // naiveGames = %d", epsilon, alpha, epsilonDecay, naiveGames)
+	log.Printf("starting training with // epsilon = %f // alpha = K / (K + 1) = %f // gamma = %f // epsilonDecay = %f // naiveGames = %d", epsilon, K/K, gamma, epsilonDecay, naiveGames)
 
 	hostName := "rcssserver"
 
@@ -86,6 +87,11 @@ func main() {
 		currentTime := 0
 		returnValue := float32(0)
 		for {
+			// alpha is calculated so that
+			// sum(alpha(currentTime)) = \inf; and
+			// sum((alpha(currentTime)^2) < \inf
+			// as noticed by Watkins and Dayan, 1992 https://link.springer.com/content/pdf/10.1007/BF00992698.pdf
+			alpha := K / (K + float32(currentTime))
 			if p.Client.PlayMode() == rcsscommon.PlayModeTimeOver {
 				p.Client.Log(p.Client.Bye())
 				break
@@ -100,7 +106,7 @@ func main() {
 			var action int
 			takeRandomAction := rand.Float64() < epsilon
 			if takeRandomAction {
-				action = rand.Intn(4)
+				action = rand.Intn(5)
 			} else {
 				if naiveGames > 0 {
 					action = p.NaiveBehaviorPolicy()
@@ -112,7 +118,7 @@ func main() {
 					action = maxActionTensor.Data().([]int)[0]
 				}
 			}
-
+			// fmt.Println(action)
 			p.ExecuteBehavior(action)
 
 			err = p.Client.Error()
@@ -179,20 +185,16 @@ func main() {
 			}
 			currentQ := qValues.Get(action)
 			currentQVal := currentQ.(float32)
-			qValues.Set(action, currentQVal+alpha*(td-currentQVal))
+			qValues.Set(action, currentQVal+alpha*(gamma*td-currentQVal))
 
-			isTerminal := false
-			if currentTime == 6000 {
-				isTerminal = true
-			}
-
-			err = qLearning.UpdateWithBatch(state, qValues, isTerminal)
+			err = qLearning.Update(state, qValues)
 			if err != nil {
 				p.Client.Log(err)
 			}
 
 			// S <- S'
 			state = nextState
+			// time.Sleep(1000 * time.Millisecond)
 		}
 		epsilon = epsilon * epsilonDecay
 		if naiveGames > 0 {

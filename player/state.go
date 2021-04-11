@@ -4,7 +4,7 @@ import "github.com/rcssggb/ggb-lib/rcsscommon"
 
 // State returns the state vector
 func (p *Player) State() []float64 {
-	// self := p.GetSelfData()
+	self := p.GetSelfData()
 	ball := p.GetBall()
 	// serverParams := p.Client.ServerParams()
 	// playModeOneHot := p.Client.PlayMode().OneHot()
@@ -12,8 +12,8 @@ func (p *Player) State() []float64 {
 		// self.Stamina / serverParams.StaminaMax,
 		// self.Effort,
 		// self.Capacity / serverParams.StaminaCapacity,
-		// self.X / rcsscommon.FieldMaxX,
-		// self.Y / rcsscommon.FieldMaxY,
+		self.X / rcsscommon.FieldMaxX,
+		self.Y / rcsscommon.FieldMaxY,
 		// self.T / 180.0,
 		// self.VelX / serverParams.PlayerSpeedMax,
 		// self.VelY / serverParams.PlayerSpeedMax,
