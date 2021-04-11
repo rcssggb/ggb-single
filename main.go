@@ -19,7 +19,7 @@ func main() {
 	epsilon := 0.1
 	const alpha = float32(1)
 	const epsilonDecay = 0.999
-	naiveGames := 2000
+	naiveGames := 1000
 	gameCounter := 0
 	weightsFile := "weights.rln"
 	returnsFile := "./data/returns.rln"
@@ -115,6 +115,7 @@ func main() {
 			}
 
 			// Take action A
+			// fmt.Println(action)
 			p.ExecuteBehavior(action)
 
 			err = p.Client.Error()
