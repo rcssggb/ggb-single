@@ -22,7 +22,7 @@ func main() {
 	const epsilonDecay = 0.99996
 	const alphaDecay = 0.99999
 	const nStates = 282240
-	const nActions = 13
+	const nActions = 8
 	naiveGames := 0
 	gameCounter := 0
 	qTableFile := "qtable.rln"
@@ -142,7 +142,7 @@ func main() {
 			}
 
 			// Take action A
-			p.DiscreteAction(action)
+			p.ExecuteBehavior(action)
 
 			err = p.Client.Error()
 			for err != nil {
