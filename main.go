@@ -17,11 +17,12 @@ import (
 
 func main() {
 	epsilon := 0.7
-	const K = float32(1)
+	const K = float32(60000)
 	const gamma = float32(0.99)
 	const epsilonDecay = 0.997
 	naiveGames := 0
 	gameCounter := 0
+	alphaStep := 0
 	weightsFile := "weights.rln"
 	returnsFile := "./data/returns.rln"
 
@@ -88,10 +89,10 @@ func main() {
 		returnValue := float32(0)
 		for {
 			// alpha is calculated so that
-			// sum(alpha(currentTime)) = \inf; and
-			// sum((alpha(currentTime)^2) < \inf
+			// sum(alpha(alphaStep)) = \inf; and
+			// sum((alpha(alphaStep)^2) < \inf
 			// as noticed by Watkins and Dayan, 1992 https://link.springer.com/content/pdf/10.1007/BF00992698.pdf
-			alpha := K / (K + float32(currentTime))
+			alpha := K / (K + float32(alphaStep))
 			if p.Client.PlayMode() == rcsscommon.PlayModeTimeOver {
 				p.Client.Log(p.Client.Bye())
 				break
@@ -147,6 +148,7 @@ func main() {
 
 			nextState := q.Slice2Tensor(p.State())
 			currentTime = p.Client.Time()
+			alphaStep += 1
 			r := float32(0)
 
 			if p.Client.PlayMode() == rcsscommon.PlayModeGoalL && currentTime > lastGoalTime {
