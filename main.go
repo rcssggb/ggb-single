@@ -16,10 +16,12 @@ import (
 )
 
 func main() {
-	epsilon := 0.1
-	const alpha = float32(1)
-	const epsilonDecay = 0.999
-	naiveGames := 1000
+	epsilon := 0.9
+	alpha := float32(0.1)
+	const gamma = 0.99
+	const epsilonDecay = 0.99996
+	const alphaDecay = 0.99999
+	naiveGames := 0
 	gameCounter := 0
 	weightsFile := "weights.rln"
 	returnsFile := "./data/returns.rln"
@@ -34,7 +36,7 @@ func main() {
 	log.SetOutput(file)
 	log.SetFlags(log.Lmicroseconds | log.Lshortfile)
 
-	log.Printf("starting training with // epsilon = %f // alpha = %f // epsilonDecay = %f // naiveGames = %d", epsilon, alpha, epsilonDecay, naiveGames)
+	log.Printf("starting training with\n alpha = %f\n alphaDecay = %f\n epsilon = %f\n epsilonDecay = %f\n naiveGames = %d", alpha, alphaDecay, epsilon, epsilonDecay, naiveGames)
 
 	hostName := "rcssserver"
 
@@ -95,7 +97,7 @@ func main() {
 		var action int
 		takeRandomAction := rand.Float64() < epsilon
 		if takeRandomAction {
-			action = rand.Intn(8)
+			action = rand.Intn(qLearning.NBehaviors)
 		} else {
 			if naiveGames > 0 {
 				action = p.NaiveBehaviorPolicy()
@@ -147,22 +149,24 @@ func main() {
 			currentTime = p.Client.Time()
 			r := float32(0)
 
-			// Observe R
-			// ball := p.GetBall()
-			// if ball.NotSeenFor > 0 {
-			// 	r -= 0.01
-			// } else {
-			// 	r -= float32(ball.Distance) * 0.001 / 6000
-			// }
+			ppos := t.GlobalPositions().Teams["single-agent"][1]
+			bpos := t.GlobalPositions().Ball
 
-			if p.Client.PlayMode() == rcsscommon.PlayModeGoalL && currentTime > lastGoalTime {
+			distToBall := math.Sqrt(math.Pow(bpos.X-ppos.X, 2) + math.Pow(bpos.Y-ppos.Y, 2))
+			r += float32(-distToBall) * 0.001 / 6000.0
+
+			r += float32(bpos.DeltaX) / 6000.0
+
+			// gx, gy := rcsscommon.FlagRightGoal.Position()
+			// r += -math.Sqrt(math.Pow(bpos.X-gx, 2)+math.Pow(bpos.Y-gy, 2)) / gx * 0.0001
+
+			if currentTime > lastGoalTime {
 				lastGoalTime = currentTime
-				r = 1
-				p.Client.Log("goal!")
-			} else if p.Client.PlayMode() == rcsscommon.PlayModeGoalR && currentTime > lastGoalTime {
-				lastGoalTime = currentTime
-				r = -1
-				p.Client.Log("goal against, bad!")
+				if p.Client.PlayMode() == rcsscommon.PlayModeGoalL {
+					r += 1.0
+				} else if p.Client.PlayMode() == rcsscommon.PlayModeGoalR {
+					r += -1.0
+				}
 			}
 
 			returnValue += r
@@ -175,7 +179,7 @@ func main() {
 			var nextAction int
 			takeRandomAction := rand.Float64() < epsilon
 			if takeRandomAction {
-				nextAction = rand.Intn(8)
+				nextAction = rand.Intn(qLearning.NBehaviors)
 			} else {
 				if naiveGames > 0 {
 					nextAction = p.NaiveBehaviorPolicy()
@@ -216,12 +220,12 @@ func main() {
 
 			td := r
 			if p.Client.PlayMode() != rcsscommon.PlayModeTimeOver {
-				td += nextQVal
+				td += gamma * nextQVal
 			}
 
 			qValues.Set(action, currentQVal+alpha*(td-currentQVal))
 
-			err = qLearning.UpdateWithBatch(state, qValues)
+			err = qLearning.Update(state, qValues)
 			if err != nil {
 				p.Client.Log(err)
 			}
@@ -232,6 +236,7 @@ func main() {
 			action = nextAction
 		}
 		epsilon = epsilon * epsilonDecay
+		alpha = alpha * alphaDecay
 		if naiveGames > 0 {
 			naiveGames--
 		}
@@ -242,7 +247,7 @@ func main() {
 		// Write return at the end of episode
 		returnValues = append(returnValues, returnValue)
 
-		if gameCounter%10 == 0 {
+		if gameCounter%50 == 0 {
 			err = qLearning.Save(weightsFile)
 			if err != nil {
 				log.Println(err)
@@ -263,6 +268,9 @@ func main() {
 
 				file.Close()
 				log.Printf("return history saved after %d games\n", gameCounter)
+				log.Printf("training time = %s\n", timeSinceStart)
+				log.Printf("alpha = %f\n", alpha)
+				log.Printf("epsilon = %f\n", epsilon)
 			}
 		}
 		time.Sleep(2 * time.Second)
