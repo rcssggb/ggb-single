@@ -44,8 +44,7 @@ func Init() (*QLearning, error) {
 	out := m.NewInput("actionValue", yShape)
 
 	qModel.AddLayers(
-		layer.FC{Input: in.Squeeze()[0], Output: 2048, Init: gorgonia.GlorotN(0.001), BiasInit: gorgonia.GlorotN(0.001)},
-		layer.FC{Input: 2048, Output: 1024, Init: gorgonia.GlorotN(0.001), BiasInit: gorgonia.GlorotN(0.001)},
+		layer.FC{Input: in.Squeeze()[0], Output: 1024, Init: gorgonia.GlorotN(0.001), BiasInit: gorgonia.GlorotN(0.001)},
 		layer.FC{Input: 1024, Output: 512, Init: gorgonia.GlorotN(0.001), BiasInit: gorgonia.GlorotN(0.001)},
 		layer.FC{Input: 512, Output: 256, Init: gorgonia.GlorotN(0.001), BiasInit: gorgonia.GlorotN(0.001)},
 		layer.FC{Input: 256, Output: 128, Init: gorgonia.GlorotN(0.001), BiasInit: gorgonia.GlorotN(0.001)},
