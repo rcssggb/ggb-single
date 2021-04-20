@@ -105,7 +105,7 @@ func main() {
 		p.Client.SynchSee()
 		p.Client.ChangeView(rcsscommon.ViewWidthNarrow, rcsscommon.ViewQualityHigh)
 
-		time.Sleep(50 * time.Millisecond)
+		time.Sleep(10 * time.Millisecond)
 
 		// Initialize S
 		state := p.State()
@@ -198,7 +198,7 @@ func main() {
 
 			// S <- S'
 			state = nextState
-			time.Sleep(10 * time.Microsecond)
+			// time.Sleep(10 * time.Microsecond)
 		}
 		if naiveGames > 0 {
 			naiveGames--
@@ -244,6 +244,6 @@ func main() {
 			log.Printf("epsilon = %f\n", epsilon)
 
 		}
-		time.Sleep(1400 * time.Millisecond)
+		time.Sleep(1100 * time.Millisecond)
 	}
 }
