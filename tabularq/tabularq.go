@@ -87,8 +87,8 @@ func (q *QLearning) Update(state, action int, reward float64, nextState int) {
 		altTable = q.A
 	}
 
-	nextGreedyAction, _ := altTable[state].Max()
-	mainTable[state][action] = mainTable[state][action] + q.Alpha*(reward+q.Gamma*mainTable[nextState][nextGreedyAction]-mainTable[state][action])
+	nextGreedyAction, _ := mainTable[nextState].Max()
+	mainTable[state][action] = mainTable[state][action] + q.Alpha*(reward+q.Gamma*altTable[nextState][nextGreedyAction]-mainTable[state][action])
 }
 
 // Save saves the Q table encoded as gob
