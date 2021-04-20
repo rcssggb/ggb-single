@@ -244,6 +244,6 @@ func main() {
 			log.Printf("epsilon = %f\n", epsilon)
 
 		}
-		time.Sleep(1000 * time.Millisecond)
+		time.Sleep(1400 * time.Millisecond)
 	}
 }
