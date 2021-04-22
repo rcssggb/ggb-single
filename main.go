@@ -105,7 +105,7 @@ func main() {
 		p.Client.SynchSee()
 		p.Client.ChangeView(rcsscommon.ViewWidthNarrow, rcsscommon.ViewQualityHigh)
 
-		time.Sleep(10 * time.Millisecond)
+		time.Sleep(20 * time.Millisecond)
 
 		// Initialize S
 		state := p.State()
@@ -243,6 +243,6 @@ func main() {
 			log.Printf("epsilon = %f\n", epsilon)
 
 		}
-		time.Sleep(1400 * time.Millisecond)
+		time.Sleep(1800 * time.Millisecond)
 	}
 }
