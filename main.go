@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/gob"
+	"encoding/json"
+	"io/ioutil"
 	"log"
 	"math"
 	"math/rand"
@@ -15,9 +17,15 @@ import (
 	q "github.com/rcssggb/ggb-single/tabularq"
 )
 
+type trainingInfo struct {
+	Epsilon   float64
+	Alpha     float64
+	GameCount int
+}
+
 func main() {
 	epsilon := 0.9
-	const alpha = 0.1
+	alpha := 0.1
 	const gamma = 0.99
 	const epsilonDecay = 0.99996
 	const alphaDecay = 0.99999
@@ -27,6 +35,7 @@ func main() {
 	gameCounter := 0
 	qTableFile := "qtable.rln"
 	returnsFile := "./data/returns.rln"
+	infoFile := "info.json"
 
 	logName := time.Now().String() + ".log"
 	file, err := os.OpenFile(path.Join("logs", logName), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
@@ -34,6 +43,23 @@ func main() {
 		log.Fatal(err)
 	}
 	defer file.Close()
+
+	var info trainingInfo
+	_, err = os.Stat(infoFile)
+	if !os.IsNotExist(err) {
+		i, _ := ioutil.ReadFile(infoFile)
+		err = json.Unmarshal(i, &info)
+		if err != nil {
+			log.Fatal(err)
+		}
+		alpha = info.Alpha
+		epsilon = info.Epsilon
+		gameCounter = info.GameCount
+	} else {
+		info.Alpha = alpha
+		info.Epsilon = epsilon
+		info.GameCount = gameCounter
+	}
 
 	log.SetOutput(file)
 	log.SetFlags(log.Lmicroseconds | log.Lshortfile)
@@ -238,12 +264,25 @@ func main() {
 			}
 
 			file.Close()
+
+			info.Alpha = qLearning.Alpha
+			info.Epsilon = epsilon
+			info.GameCount = gameCounter
+			i, err := json.Marshal(info)
+			if err != nil {
+				log.Println(err)
+			}
+			err = ioutil.WriteFile("info.json", i, 0666)
+			if err != nil {
+				log.Println(err)
+			}
+
 			log.Printf("return history saved after %d games\n", gameCounter)
 			log.Printf("training time = %s\n", timeSinceStart)
 			log.Printf("alpha = %f\n", qLearning.Alpha)
 			log.Printf("epsilon = %f\n", epsilon)
 
 		}
-		time.Sleep(1400 * time.Millisecond)
+		time.Sleep(2000 * time.Millisecond)
 	}
 }
