@@ -48,7 +48,7 @@ func main() {
 	trainingStart := time.Now()
 	var info trainingInfo
 	_, err = os.Stat(infoFile)
-	if os.IsExist(err) {
+	if !os.IsNotExist(err) {
 		i, _ := ioutil.ReadFile(infoFile)
 		err = json.Unmarshal(i, &info)
 		if err != nil {
@@ -62,7 +62,7 @@ func main() {
 		info.Alpha = alpha
 		info.Epsilon = epsilon
 		info.GameCount = gameCounter
-		info.TrainingStart = time.Now()
+		info.TrainingStart = trainingStart
 	}
 
 	log.SetOutput(file)
