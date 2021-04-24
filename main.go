@@ -18,9 +18,10 @@ import (
 )
 
 type trainingInfo struct {
-	Epsilon   float64
-	Alpha     float64
-	GameCount int
+	Epsilon       float64
+	Alpha         float64
+	GameCount     int
+	TrainingStart time.Time
 }
 
 func main() {
@@ -44,9 +45,10 @@ func main() {
 	}
 	defer file.Close()
 
+	trainingStart := time.Now()
 	var info trainingInfo
 	_, err = os.Stat(infoFile)
-	if !os.IsNotExist(err) {
+	if os.IsExist(err) {
 		i, _ := ioutil.ReadFile(infoFile)
 		err = json.Unmarshal(i, &info)
 		if err != nil {
@@ -55,10 +57,12 @@ func main() {
 		alpha = info.Alpha
 		epsilon = info.Epsilon
 		gameCounter = info.GameCount
+		trainingStart = info.TrainingStart
 	} else {
 		info.Alpha = alpha
 		info.Epsilon = epsilon
 		info.GameCount = gameCounter
+		info.TrainingStart = time.Now()
 	}
 
 	log.SetOutput(file)
@@ -102,7 +106,6 @@ func main() {
 		}
 		f.Close()
 	}
-	trainingStart := time.Now()
 	lastEnd := trainingStart
 	errCount := 0
 	for {
