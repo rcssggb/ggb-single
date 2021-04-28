@@ -18,8 +18,6 @@ import (
 )
 
 type trainingInfo struct {
-	Epsilon   float64
-	Alpha     float64
 	GameCount int
 }
 
@@ -51,12 +49,8 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		alpha = info.Alpha
-		epsilon = info.Epsilon
 		gameCounter = info.GameCount
 	} else {
-		info.Alpha = alpha
-		info.Epsilon = epsilon
 		info.GameCount = gameCounter
 	}
 
@@ -82,6 +76,7 @@ func main() {
 	}
 	qLearning.Gamma = gamma
 	qLearning.Alpha = alphaK / (alphaK + float64(gameCounter))
+	epsilon = epsilonK / (epsilonK + float64(gameCounter))
 
 	_, err = os.Stat(returnsFile)
 	returnValues := []float64{}
@@ -263,8 +258,6 @@ func main() {
 
 			file.Close()
 
-			info.Alpha = qLearning.Alpha
-			info.Epsilon = epsilon
 			info.GameCount = gameCounter
 			i, err := json.Marshal(info)
 			if err != nil {
@@ -281,6 +274,6 @@ func main() {
 			log.Printf("epsilon = %f\n", epsilon)
 
 		}
-		time.Sleep(1400 * time.Millisecond)
+		time.Sleep(2400 * time.Millisecond)
 	}
 }
