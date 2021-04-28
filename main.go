@@ -24,11 +24,10 @@ type trainingInfo struct {
 }
 
 func main() {
-	epsilon := 0.9
-	alpha := 0.1
+	const epsilonK = 8000.0
+	const alphaK = 6000.0
+	var epsilon float64
 	const gamma = 0.99
-	const epsilonDecay = 0.99996
-	const alphaDecay = 0.99999
 	const nStates = 282240
 	const nActions = 13
 	naiveGames := 0
@@ -64,7 +63,7 @@ func main() {
 	log.SetOutput(file)
 	log.SetFlags(log.Lmicroseconds | log.Lshortfile)
 
-	log.Printf("starting training with\n alpha = %f\n alphaDecay = %f\n epsilon = %f\n epsilonDecay = %f\n naiveGames = %d", alpha, alphaDecay, epsilon, epsilonDecay, naiveGames)
+	log.Printf("starting training with\n alpha = %f\n alphaK = %f\n epsilon = %f\n epsilonDecay = %f\n", alphaK/(alphaK+float64(gameCounter)), alphaK, epsilonK/(epsilonK+float64(gameCounter)), epsilonK)
 
 	hostName := "rcssserver"
 
@@ -82,7 +81,7 @@ func main() {
 		}
 	}
 	qLearning.Gamma = gamma
-	qLearning.Alpha = alpha
+	qLearning.Alpha = alphaK / (alphaK + float64(gameCounter))
 
 	_, err = os.Stat(returnsFile)
 	returnValues := []float64{}
@@ -131,7 +130,7 @@ func main() {
 		p.Client.SynchSee()
 		p.Client.ChangeView(rcsscommon.ViewWidthNarrow, rcsscommon.ViewQualityHigh)
 
-		time.Sleep(20 * time.Millisecond)
+		time.Sleep(10 * time.Millisecond)
 
 		// Initialize S
 		state := p.State()
@@ -229,8 +228,8 @@ func main() {
 			naiveGames--
 		}
 		gameCounter++
-		epsilon *= epsilonDecay
-		qLearning.Alpha *= alphaDecay
+		epsilon = epsilonK / (epsilonK + float64(gameCounter))
+		qLearning.Alpha = alphaK / (alphaK + float64(gameCounter))
 
 		now := time.Now()
 		timeSinceStart := now.Sub(trainingStart)
@@ -282,6 +281,6 @@ func main() {
 			log.Printf("epsilon = %f\n", epsilon)
 
 		}
-		time.Sleep(1800 * time.Millisecond)
+		time.Sleep(1400 * time.Millisecond)
 	}
 }
