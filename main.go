@@ -18,12 +18,12 @@ import (
 func main() {
 	const epsilonK = 8000.0
 	const alphaK = 6000.0
-	var epsilon float64
 	const gamma = 0.99
 	const nStates = 282240
 	const nActions = 13
 	naiveGames := 0
 	gameCounter := 0
+	epsilon := epsilonK / (epsilonK + float64(gameCounter))
 	qTableFile := "qtable.rln"
 	returnsFile := "./data/returns.rln"
 
