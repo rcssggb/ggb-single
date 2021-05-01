@@ -31,7 +31,7 @@ func main() {
 	const alphaDecay = 0.99999
 	naiveGames := 0
 	gameCounter := 0
-	saveEvery := 5
+	saveEvery := 100
 	weightsFile := "weights.rln"
 	returnsFile := "./data/returns.rln"
 	infoFile := "info.json"
