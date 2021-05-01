@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/gob"
+	"encoding/json"
+	"io/ioutil"
 	"log"
 	"math"
 	"math/rand"
@@ -15,16 +17,24 @@ import (
 	q "github.com/rcssggb/ggb-single/qlearning"
 )
 
+type trainingInfo struct {
+	Epsilon   float64
+	Alpha     float32
+	GameCount int
+}
+
 func main() {
 	epsilon := 0.9
 	alpha := float32(0.1)
 	const gamma = 0.99
-	const epsilonDecay = 0.99996
+	const epsilonDecay = 0.9999
 	const alphaDecay = 0.99999
 	naiveGames := 0
 	gameCounter := 0
+	saveEvery := 5
 	weightsFile := "weights.rln"
 	returnsFile := "./data/returns.rln"
+	infoFile := "info.json"
 
 	logName := time.Now().String() + ".log"
 	file, err := os.OpenFile(path.Join("logs", logName), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
@@ -32,6 +42,23 @@ func main() {
 		log.Fatal(err)
 	}
 	defer file.Close()
+
+	var info trainingInfo
+	_, err = os.Stat(infoFile)
+	if !os.IsNotExist(err) {
+		i, _ := ioutil.ReadFile(infoFile)
+		err = json.Unmarshal(i, &info)
+		if err != nil {
+			log.Fatal(err)
+		}
+		alpha = info.Alpha
+		epsilon = info.Epsilon
+		gameCounter = info.GameCount
+	} else {
+		info.Alpha = alpha
+		info.Epsilon = epsilon
+		info.GameCount = gameCounter
+	}
 
 	log.SetOutput(file)
 	log.SetFlags(log.Lmicroseconds | log.Lshortfile)
@@ -247,14 +274,14 @@ func main() {
 		// Write return at the end of episode
 		returnValues = append(returnValues, returnValue)
 
-		if gameCounter%50 == 0 {
+		if gameCounter%saveEvery == 0 {
 			err = qLearning.Save(weightsFile)
 			if err != nil {
 				log.Println(err)
 			}
 			log.Printf("current epsilon = %f\n", epsilon)
 			log.Printf("weights saved after %d games\n", gameCounter)
-			if gameCounter%50 == 0 {
+			if gameCounter%saveEvery == 0 {
 				file, err := os.Create(returnsFile)
 				if err != nil {
 					log.Println(err)
@@ -267,6 +294,19 @@ func main() {
 				}
 
 				file.Close()
+
+				info.Alpha = alpha
+				info.Epsilon = epsilon
+				info.GameCount = gameCounter
+				i, err := json.Marshal(info)
+				if err != nil {
+					log.Println(err)
+				}
+				err = ioutil.WriteFile("info.json", i, 0666)
+				if err != nil {
+					log.Println(err)
+				}
+
 				log.Printf("return history saved after %d games\n", gameCounter)
 				log.Printf("training time = %s\n", timeSinceStart)
 				log.Printf("alpha = %f\n", alpha)
