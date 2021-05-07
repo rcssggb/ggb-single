@@ -37,7 +37,7 @@ func main() {
 	log.SetOutput(file)
 	log.SetFlags(log.Lmicroseconds | log.Lshortfile)
 
-	log.Printf("starting training with\n alpha = %f\n alphaK = %f\n epsilon = %f\n epsilonDecay = %f\n", alphaK/(alphaK+float64(gameCounter)), alphaK, epsilonK/(epsilonK+float64(gameCounter)), epsilonK)
+	log.Printf("starting training with\n alpha = %f\n alphaK = %f\n epsilon = %f\n epsilonDecay = %f\n", alphaK/(alphaK+float64(gameCounter)), alphaK, epsilon, epsilonK)
 
 	hostName := "rcssserver"
 
